@@ -184,7 +184,7 @@ export class PersoniumClient {
 
     //エンティティ取得
     get(cell: string, path: string, _token?: string){
-        return new Promise<PersoniumData[]>((resolve, reject) => {
+        return new Promise<PersoniumData | PersoniumData[]>((resolve, reject) => {
             const token = _token || this.token;
             const url = this.createCellSchema(cell)+path;
             request
