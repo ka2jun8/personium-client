@@ -182,9 +182,28 @@ export class PersoniumClient {
         });
     }
 
+    isExist(cell: string, path: string, _token?: string) {
+        return new Promise<boolean>((resolve, reject) => {
+            const token = _token || this.token;
+            const url = this.createCellSchema(cell)+path;
+            request
+            .get(url)
+            .set("Accept", "application/json")
+            .set("Authorization", "Bearer "+token)
+            .end((error, res)=>{
+                if(error){
+                    resolve(false);
+                }
+                else {
+                    resolve(true);
+                }
+            });
+        });
+    }
+
     //エンティティ取得
     get(cell: string, path: string, _token?: string){
-        return new Promise<PersoniumData | PersoniumData[]>((resolve, reject) => {
+        return new Promise<PersoniumData[]>((resolve, reject) => {
             const token = _token || this.token;
             const url = this.createCellSchema(cell)+path;
             request
@@ -205,7 +224,7 @@ export class PersoniumClient {
 
     //エンティティ書き込み
     post(cell: string, path: string, entity: any, _token?: string){
-        return new Promise<PersoniumData | PersoniumData[]>((resolve, reject) => {
+        return new Promise<any>((resolve, reject) => {
             const token = _token || this.token;
             const url = this.createCellSchema(cell)+path;
             request
@@ -227,9 +246,9 @@ export class PersoniumClient {
 
     //エンティティ上書き
     update(cell: string, path: string, id: string, entity: any, _token?: string){
-        return new Promise<PersoniumData | PersoniumData[]>((resolve, reject) => {
+        return new Promise<any>((resolve, reject) => {
             const token = _token || this.token;
-            const url = this.createCellSchema(cell)+path+"("+id+")";
+            const url = this.createCellSchema(cell)+path+"('"+id+"')";
             request
             .put(url)
             .set("Accept", "application/json")
@@ -240,8 +259,7 @@ export class PersoniumClient {
                     reject(error);
                 }
                 else {
-                    const response: PersoniumResponse = JSON.parse(res.text);
-                    resolve(response.d.results);
+                    resolve();
                 }
             });
         });
