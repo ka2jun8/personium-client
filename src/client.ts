@@ -202,7 +202,51 @@ export class PersoniumClient {
             });
         });
     }
-        
+
+    //エンティティ書き込み
+    post(cell: string, path: string, entity: any, _token?: string){
+        return new Promise<PersoniumData | PersoniumData[]>((resolve, reject) => {
+            const token = _token || this.token;
+            const url = this.createCellSchema(cell)+path;
+            request
+            .post(url)
+            .set("Accept", "application/json")
+            .set("Authorization", "Bearer "+token)
+            .send(entity)
+            .end((error, res)=>{
+                if(error){
+                    reject(error);
+                }
+                else {
+                    const response: PersoniumResponse = JSON.parse(res.text);
+                    resolve(response.d.results);
+                }
+            });
+        });
+    }
+
+    //エンティティ上書き
+    update(cell: string, path: string, id: string, entity: any, _token?: string){
+        return new Promise<PersoniumData | PersoniumData[]>((resolve, reject) => {
+            const token = _token || this.token;
+            const url = this.createCellSchema(cell)+path+"("+id+")";
+            request
+            .put(url)
+            .set("Accept", "application/json")
+            .set("Authorization", "Bearer "+token)
+            .send(entity)
+            .end((error, res)=>{
+                if(error){
+                    reject(error);
+                }
+                else {
+                    const response: PersoniumResponse = JSON.parse(res.text);
+                    resolve(response.d.results);
+                }
+            });
+        });
+    }
+
     createCellSchema(cell: string) {
         return `https://${this.host}/${cell}/`;
     }
