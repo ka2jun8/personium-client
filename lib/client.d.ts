@@ -46,6 +46,8 @@ export declare class PersoniumClient {
     sendMessage(cell: string, to: string, type: string, requestContent: string, _token?: string): Promise<PersoniumProfileResponse>;
     getProfile(cell: string): Promise<PersoniumProfileResponse>;
     get(cell: string, path: string, _token?: string): Promise<PersoniumData | PersoniumData[]>;
+    post(cell: string, path: string, entity: any, _token?: string): Promise<PersoniumData | PersoniumData[]>;
+    update(cell: string, path: string, id: string, entity: any, _token?: string): Promise<PersoniumData | PersoniumData[]>;
     createCellSchema(cell: string): string;
     extractCellName(url: string): string;
 }
