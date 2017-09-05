@@ -1,4 +1,5 @@
 import * as request from "superagent";
+import {toEscapeSequence} from "./utility";
 
 export interface PersoniumAccessToken {
     access_token: string,
@@ -33,6 +34,29 @@ export interface ExtCell extends PersoniumData {
       uri: string,
     },
   },
+}
+
+export interface Rule {
+    name: string,
+    service: string,
+    action: string,
+    doaction: string,
+    object: string,
+    extservice: string,
+}
+
+export interface Script {
+    name: string,
+    uri: string,
+}
+
+export interface Rules {
+    rules: Rule[],
+    scripts: Script[],
+}
+
+export interface Link extends PersoniumData{
+    uri: string,
 }
 
 export interface PersoniumProfileResponse {
@@ -123,6 +147,46 @@ export class PersoniumClient {
         });
     }
 
+    getExtCellLisks(cell: string, targetCellUrl: string, type: string, _token?: string) {
+        return new Promise<Link>((resolve, reject) => {
+            const token = _token || this.token;
+            const url = this.createCellSchema(cell)+"__ctl/ExtCell('"+toEscapeSequence(targetCellUrl)+"')/\$links/"+type; 
+            request
+            .get(url)
+            .set("Accept", "application/json")
+            .set("Authorization", "Bearer "+token)
+            .end((error, res)=>{
+                if(error){
+                    reject(error);
+                }
+                else {
+                    const response: PersoniumResponse = JSON.parse(res.text);
+                    resolve(response.d.results);
+                }
+            });
+        });
+    }
+
+    getRules(cell: string, _token?: string){
+        return new Promise<Rules>((resolve, reject) => {
+            const token = _token || this.token;
+            const url = this.createCellSchema(cell)+"__rule/"; 
+            request
+            .get(url)
+            .set("Accept", "application/json")
+            .set("Authorization", "Bearer "+token)
+            .end((error, res)=>{
+                if(error){
+                    reject(error);
+                }
+                else {
+                    const response: Rules = JSON.parse(res.text);
+                    resolve(response);
+                }
+            });
+        });
+    }
+
     sendMessage(cell: string, to: string, type: string, requestContent: string, _token?: string) {
         return new Promise<PersoniumProfileResponse>((resolve, reject) => {
             const token = _token || this.token;
@@ -202,10 +266,15 @@ export class PersoniumClient {
     }
 
     //エンティティ取得
-    get(cell: string, path: string, _token?: string){
+    get(cell: string, path: string, query?: string, _token?: string){
         return new Promise<PersoniumData[]>((resolve, reject) => {
             const token = _token || this.token;
-            const url = this.createCellSchema(cell)+path;
+            let url = this.createCellSchema(cell)+path;
+            if(query) {
+                url += "?"+"\$orderby="+toEscapeSequence(query);
+            }else {
+                url += "?\orderby=__updated%20desc";
+            }
             request
             .get(url)
             .set("Accept", "application/json")
