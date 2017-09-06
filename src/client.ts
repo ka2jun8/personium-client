@@ -249,10 +249,10 @@ export class PersoniumClient {
         });
     }
 
-    isExist(cell: string, path: string, _token?: string) {
+    isExist(cell: string, path: string, __id: string, _token?: string) {
         return new Promise<boolean>((resolve, reject) => {
             const token = _token || this.token;
-            const url = this.createCellSchema(cell)+path;
+            const url = this.createCellSchema(cell)+path+"('"+__id+"')";
             request
             .get(url)
             .set("Accept", "application/json")
