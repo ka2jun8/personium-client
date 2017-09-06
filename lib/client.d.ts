@@ -66,7 +66,7 @@ export declare class PersoniumClient {
     getRules(cell: string, _token?: string): Promise<Rules>;
     sendMessage(cell: string, to: string, type: string, requestContent: string, _token?: string): Promise<PersoniumProfileResponse>;
     getProfile(cell: string): Promise<PersoniumProfileResponse>;
-    isExist(cell: string, path: string, _token?: string): Promise<boolean>;
+    isExist(cell: string, path: string, __id: string, _token?: string): Promise<boolean>;
     get(cell: string, path: string, query?: string, _token?: string): Promise<PersoniumData[]>;
     post(cell: string, path: string, entity: any, _token?: string): Promise<any>;
     update(cell: string, path: string, id: string, entity: any, _token?: string): Promise<any>;
