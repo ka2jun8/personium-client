@@ -1,6 +1,9 @@
 import * as request from "superagent";
 import {toEscapeSequence} from "./utility";
 
+//for using Promise on es5
+import {Promise} from "es6-promise";
+
 export interface PersoniumAccessToken {
     access_token: string,
     refresh_token: string,

@@ -6,6 +6,7 @@
   "author": "kani",
   "license": "MIT",
   "devDependencies": {
+    "@types/es6-promise": "^0.0.33",
     "ts-loader": "^2.2.2",
     "tslint": "^5.5.0",
     "tslint-loader": "^3.5.3",
@@ -14,6 +15,7 @@
   },
   "dependencies": {
     "@types/superagent": "^3.5.5",
+    "es6-promise": "^4.1.1",
     "superagent": "^3.6.0"
   }
 }
