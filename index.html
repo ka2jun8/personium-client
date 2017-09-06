@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Personiumテスト</title>
+    <script type="text/javascript" charset="utf-8" src="./dist/personium-client.js"></script>
+
+    <script>
+        var access_token = "";
+        var host = "personium1.pssys.flab.fujitsu.co.jp";
+        var cell = "Boss";
+        var username = "boss1";
+        var password = "piyopiyo";
+        var client = new PersoniumClient.PersoniumClient(host);
+        client.login(cell, username, password).then(function (token) {
+            console.log("client login ok");
+            access_token = token.access_token;
+        }).then(function(){
+            client.get(cell, "Place/Flab/room", null, access_token).then((response) => {
+                //you can get personium data
+                var data = JSON.stringify(response);
+                console.log("data", data);
+            }).catch((error) => {
+                console.error(error);
+            });
+        });
+
+    </script>
+</head>
+
+<body role="document">
+    <h3>Personiumテスト</h3>
+</body>
+
+</html>
