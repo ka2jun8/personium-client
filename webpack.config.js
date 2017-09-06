@@ -11,10 +11,6 @@ module.exports = [
             filename: "personium-client.js",
             libraryTarget: "var"
         },
-        devtool: "#source-map",
-        resolve: {
-            extensions: ['.ts', '.js'],
-        },
         module: {
             rules: [{
                 test: /\.ts(x?)$/,
@@ -29,6 +25,10 @@ module.exports = [
                 PACKAGE_VERSION: JSON.stringify(require("./package.json").version)
             }),
         ],
+        resolve: {
+            extensions: ['.ts', '.js'],
+        },
+        devtool: 'inline-source-map'
     },
     {
         entry: {
