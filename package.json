@@ -2,14 +2,15 @@
   "name": "personium-client",
   "version": "0.0.1",
   "main": "index.js",
-  "types": "./lib/client.d.ts",  
+  "types": "./lib/client.d.ts",
   "author": "kani",
   "license": "MIT",
   "devDependencies": {
     "ts-loader": "^2.2.2",
     "tslint": "^5.5.0",
     "tslint-loader": "^3.5.3",
-    "typescript": "^2.4.1"
+    "typescript": "^2.4.1",
+    "webpack": "^3.5.5"
   },
   "dependencies": {
     "@types/superagent": "^3.5.5",
