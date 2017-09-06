@@ -1,0 +1,1 @@
+module.exports = require("./dist/personium-client.webpack.js");
