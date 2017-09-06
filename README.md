@@ -24,7 +24,7 @@ client.login(cell, username, password).then(function(token){
   client.post(cellName, EntityPath, Entity).then().catch();  
   
   //update entity
-  client.update(cellName, EntityPath, EntityId, Entity){
+  client.update(cellName, EntityPath, EntityId, Entity).then().catch();
 
 }).catch(function(error){
   console.log(error);
