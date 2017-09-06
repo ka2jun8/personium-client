@@ -9,6 +9,7 @@ module.exports = [
         output: {
             path: __dirname + "/dist/",
             filename: "personium-client.js",
+            library: "PersoniumClient",
             libraryTarget: "var"
         },
         module: {
