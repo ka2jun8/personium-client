@@ -37,7 +37,8 @@ module.exports = [
         },
         output: {
             path: __dirname,
-            filename: './lib/personium-client.js'
+            filename: './lib/personium-client.js',
+            libraryTarget: "commonjs2"
         },
         module: {
             rules: [{
