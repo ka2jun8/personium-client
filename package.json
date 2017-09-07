@@ -5,8 +5,19 @@
   "types": "./lib/client.d.ts",
   "author": "kani",
   "license": "MIT",
+  "scripts": {
+    "build": "webpack",
+    "watch": "webpack --watch",
+    "test": "mocha --compilers ts:espower-typescript/guess -w src/test/*.ts"
+  },
   "devDependencies": {
     "@types/es6-promise": "^0.0.33",
+    "@types/mocha": "^2.2.42",
+    "@types/power-assert": "^1.4.29",
+    "espower-typescript": "^8.1.1",
+    "mocha": "^3.5.0",
+    "moment": "^2.18.1",
+    "power-assert": "^1.4.4",
     "ts-loader": "^2.2.2",
     "tslint": "^5.5.0",
     "tslint-loader": "^3.5.3",
