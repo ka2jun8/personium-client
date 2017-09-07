@@ -33,6 +33,12 @@ client.login(cell, username, password).then(function(token){
 
 ```
 
+### how to test
+```
+npm install
+npm test # (mocha + power-assert)
+```
+
 ### how to build
 
 ```
