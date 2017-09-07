@@ -331,7 +331,7 @@ export class PersoniumClient {
                     reject(error);
                 }
                 else {
-                    resolve();
+                    resolve(true);
                 }
             });
         });
