@@ -1,8 +1,8 @@
 import * as request from "superagent";
-import {toEscapeSequence} from "./utility";
+import { Encode, Decode } from "./utility";
 
 //for using Promise on es5
-import {Promise} from "es6-promise";
+import { Promise } from "es6-promise";
 
 export interface PersoniumAccessToken {
     access_token: string,
@@ -10,33 +10,33 @@ export interface PersoniumAccessToken {
 }
 
 export interface PersoniumResponse {
-  d: {
-    results: any,
-  }
+    d: {
+        results: any,
+    }
 }
 
 export interface PersoniumData {
-  __metadata: {
-    uri: string,
-    etag: string,
-    type: string,
-  },
-  __published: string, //Date(xxx)
-  __updated: string, //Date(xxx)
+    __metadata: {
+        uri: string,
+        etag: string,
+        type: string,
+    },
+    __published: string, //Date(xxx)
+    __updated: string, //Date(xxx)
 }
 
 export interface ExtCell extends PersoniumData {
-  Url: string,
-  _Role: {
-    __deferred: {
-      uri: string,
+    Url: string,
+    _Role: {
+        __deferred: {
+            uri: string,
+        },
     },
-  },
-  _Relation: {
-    __deferred: {
-      uri: string,
+    _Relation: {
+        __deferred: {
+            uri: string,
+        },
     },
-  },
 }
 
 export interface Rule {
@@ -58,15 +58,45 @@ export interface Rules {
     scripts: Script[],
 }
 
-export interface Link extends PersoniumData{
+export interface Link extends PersoniumData {
     uri: string,
 }
 
+export interface Role extends PersoniumData {
+    Name: string,
+    "_Box.Name": string,
+    _Box: {
+        __deferred: {
+            uri: string,
+        }
+    },
+    _Account: {
+        __deferred: {
+            uri: string,
+        }
+    },
+    _ExtCell: {
+        __deferred: {
+            uri: string,
+        }
+    },
+    _ExtRole: {
+        __deferred: {
+            uri: string,
+        }
+    },
+    _Relation: {
+        __deferred: {
+            uri: string,
+        }
+    }
+}
+
 export interface PersoniumProfileResponse {
-  DisplayName: string, 
-  Description: string, 
-  Image: string, 
-  ProfileImageName: string,
+    DisplayName: string,
+    Description: string,
+    Image: string,
+    ProfileImageName: string,
 }
 
 export class PersoniumClient {
@@ -75,118 +105,306 @@ export class PersoniumClient {
     token: string = null;
 
     constructor(unit: string) {
-        if(!unit){
+        if (!unit) {
             console.warn("Please set `host` address");
         }
-        else if(unit.lastIndexOf("http") === 0) {
+        else if (unit.lastIndexOf("http") === 0) {
             console.warn("`host` does not need protocol prefix");
         }
         this.host = unit;
     }
 
-    login(cell: string, username: string, password: string){
+    login(cell: string, username: string, password: string) {
         return new Promise<PersoniumAccessToken>((resolve, reject) => {
-            const url = this.createCellSchema(cell)+"__token";
+            const url = this.createCellSchema(cell) + "__token";
             request
-            .post(url)
-            .set("Accept", "application/json")
-            .type("form")
-            .send({grant_type: "password", username, password})
-            .end((error, res)=>{
-                if(error){
-                    reject(error);
-                }
-                else {
-                    const token = JSON.parse(res.text);
-                    this.personiumToken = token;
-                    this.token = token.access_token;
-                    // console.log("creating personium-client succeed");
-                    resolve(token);
-                }
-            });
+                .post(url)
+                .set("Accept", "application/json")
+                .type("form")
+                .send({ grant_type: "password", username, password })
+                .end((error, res) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        const token = JSON.parse(res.text);
+                        this.personiumToken = token;
+                        this.token = token.access_token;
+                        resolve(token);
+                    }
+                });
         })
     }
 
-    refreshAccessToken(cell: string, target: string, refreshToken: string){
+    refreshAccessToken(cell: string, refreshToken: string, target?: string) {
         return new Promise<PersoniumAccessToken>((resolve, reject) => {
-            const url = this.createCellSchema(cell)+"__token";
-            request
-            .post(url)
-            .set("Accept", "application/json")
-            .type("form")
-            .send({
-                grant_type: "refresh_token", 
+            const url = this.createCellSchema(cell) + "__token";
+            const tokenSeeds = target ? {
+                grant_type: "refresh_token",
                 refresh_token: refreshToken,
                 p_target: this.createCellSchema(target),
-            })
-            .end((error, res)=>{
-                if(error){
-                    reject(error);
-                }
-                else {
-                    resolve(JSON.parse(res.text));
-                }
-            });
+            } : {
+                    grant_type: "refresh_token",
+                    refresh_token: refreshToken,
+                };
+            request
+                .post(url)
+                .set("Accept", "application/json")
+                .type("form")
+                .send(tokenSeeds)
+                .end((error, res) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        const token = JSON.parse(res.text);
+                        this.personiumToken = token;
+                        this.token = token.access_token;
+                        resolve(token);
+                    }
+                });
         });
     }
 
-    getExtCellList(cell: string, _token?: string){
+    createRole(cell: string, role: string, box?: string, _token?: string) {
+        return new Promise<boolean>((resolve, reject) => {
+            const token = _token || this.token;
+            const url = this.createCellSchema(cell) + "__ctl/Role/";
+            const boxName = box || null;
+            let data = {};
+            if(!role) {
+                reject();
+            } else {
+                data = {
+                    Name: role,
+                }
+                if(box){
+                    data = {
+                        Name: role,
+                        "_Box.Name": boxName,
+                    }
+                }
+                request
+                    .post(url)
+                    .set("Accept", "application/json")
+                    .set("Authorization", "Bearer " + token)
+                    .send(data)
+                    .end((error, res) => {
+                        if (error) {
+                            reject(error);
+                        }
+                        else {
+                            resolve(true);
+                        }
+                    });
+            }
+        });
+    }
+
+    getRole(cell: string, role?: string, box?: string, _token?: string) {
+        return new Promise<Role[]|Role>((resolve, reject) => {
+            const token = _token || this.token;
+            let url = this.createCellSchema(cell) + "__ctl/Role";
+            if (role) {
+                url += "(Name='" + role + "')";
+            }else if(role && box){
+                url += "(Name='" + role + "',_Box.Name='" + box + "')";
+            }
+            request
+                .get(url)
+                .set("Accept", "application/json")
+                .set("Authorization", "Bearer " + token)
+                .end((error, res) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        const response: PersoniumResponse = JSON.parse(res.text);
+                        resolve(response.d.results);
+                    }
+                });
+        });
+    }
+
+    deleteRole(cell: string, role?: string, box?: string, _token?: string) {
+        return new Promise<boolean>((resolve, reject) => {
+            const token = _token || this.token;
+            let url = this.createCellSchema(cell) + "__ctl/Role";
+            if (role) {
+                url += "(Name='" + role + "')";
+            }else if(role && box){
+                url += "(Name='" + role + "',_Box.Name='" + box + "')";
+            }
+            request
+                .delete(url)
+                .set("Accept", "application/json")
+                .set("Authorization", "Bearer " + token)
+                .end((error, res) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(true);
+                    }
+                });
+        });
+    }
+
+
+    setExtCell(cell: string, setCellUrl: string, _token?: string) {
+        return new Promise<boolean>((resolve, reject) => {
+            const token = _token || this.token;
+            const url = this.createCellSchema(cell) + "__ctl/ExtCell/";
+            const data = {
+                Url: setCellUrl,
+            }
+            request
+                .post(url)
+                .set("Accept", "application/json")
+                .set("Authorization", "Bearer " + token)
+                .send(data)
+                .end((error, res) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(true);
+                    }
+                });
+        });
+    }
+
+    getExtCellList(cell: string, _token?: string) {
         return new Promise<ExtCell[]>((resolve, reject) => {
             const token = _token || this.token;
-            const url = this.createCellSchema(cell)+"__ctl/ExtCell/"; 
+            const url = this.createCellSchema(cell) + "__ctl/ExtCell/";
             request
-            .get(url)
-            .set("Accept", "application/json")
-            .set("Authorization", "Bearer "+token)
-            .end((error, res)=>{
-                if(error){
-                    reject(error);
-                }
-                else {
-                    const response: PersoniumResponse = JSON.parse(res.text);
-                    resolve(response.d.results);
-                }
-            });
+                .get(url)
+                .set("Accept", "application/json")
+                .set("Authorization", "Bearer " + token)
+                .end((error, res) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        const response: PersoniumResponse = JSON.parse(res.text);
+                        resolve(response.d.results);
+                    }
+                });
         });
     }
 
-    getExtCellLisks(cell: string, targetCellUrl: string, type: string, _token?: string) {
-        return new Promise<Link>((resolve, reject) => {
+    deleteExtCell(cell: string, deleteCellUrl: string, _token?: string) {
+        return new Promise<boolean>((resolve, reject) => {
             const token = _token || this.token;
-            const url = this.createCellSchema(cell)+"__ctl/ExtCell('"+toEscapeSequence(targetCellUrl)+"')/\$links/"+type; 
+            const url = this.createCellSchema(cell) + "__ctl/ExtCell('" + Encode(deleteCellUrl) + "')";
             request
-            .get(url)
-            .set("Accept", "application/json")
-            .set("Authorization", "Bearer "+token)
-            .end((error, res)=>{
-                if(error){
-                    reject(error);
-                }
-                else {
-                    const response: PersoniumResponse = JSON.parse(res.text);
-                    resolve(response.d.results);
-                }
-            });
+                .delete(url)
+                .set("Accept", "application/json")
+                .set("Authorization", "Bearer " + token)
+                .end((error, res) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(true);
+                    }
+                });
         });
     }
 
-    getRules(cell: string, _token?: string){
+    setExtCellLink(cell: string, targetCellUrl: string, type: string, name: string, box?: string, _token?: string) {
+        return new Promise<boolean>((resolve, reject) => {
+            const token = _token || this.token;
+            const url = this.createCellSchema(cell) + "__ctl/ExtCell('" + Encode(targetCellUrl) + "')/\$links/" + type;
+            let role = "";
+            if(name){
+                role = "(Name='" + name + "')";
+            }else if(name && box){
+                role = "(Name='" + name + "',_Box.Name='" + box + "')";
+            }
+            const data = {
+                uri: this.createCellSchema(cell) + "__ctl/" + type.substring(1) + role
+            };
+
+            request
+                .post(url)
+                .set("Accept", "application/json")
+                .set("Authorization", "Bearer " + token)
+                .send(data)
+                .end((error, res) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(true);
+                    }
+                });
+        });
+    }
+
+    getExtCellLink(cell: string, targetCellUrl: string, type: string, _token?: string) {
+        return new Promise<Link[]>((resolve, reject) => {
+            const token = _token || this.token;
+            const url = this.createCellSchema(cell) + "__ctl/ExtCell('" + Encode(targetCellUrl) + "')/\$links/" + type;
+            request
+                .get(url)
+                .set("Accept", "application/json")
+                .set("Authorization", "Bearer " + token)
+                .end((error, res) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        const response: PersoniumResponse = JSON.parse(res.text);
+                        resolve(response.d.results);
+                    }
+                });
+        });
+    }
+
+    deleteExtCellLink(cell: string, targetCellUrl: string, type: string, name: string, box?: string, _token?: string) {
+        return new Promise<boolean>((resolve, reject) => {
+            const token = _token || this.token;
+            let role = "";
+            if(name){
+                role = "(Name='" + name + "')";
+            }else if(name && box){
+                role = "(Name='" + name + "',_Box.Name='" + box + "')";
+            }
+            const url = this.createCellSchema(cell) + "__ctl/ExtCell('" + Encode(targetCellUrl) + "')/\$links/" + type + role;
+            request
+                .delete(url)
+                .set("Accept", "application/json")
+                .set("Authorization", "Bearer " + token)
+                .end((error, res) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(true);
+                    }
+                });
+        });
+    }
+
+    getRules(cell: string, _token?: string) {
         return new Promise<Rules>((resolve, reject) => {
             const token = _token || this.token;
-            const url = this.createCellSchema(cell)+"__rule/"; 
+            const url = this.createCellSchema(cell) + "__rule/";
             request
-            .get(url)
-            .set("Accept", "application/json")
-            .set("Authorization", "Bearer "+token)
-            .end((error, res)=>{
-                if(error){
-                    reject(error);
-                }
-                else {
-                    const response: Rules = JSON.parse(res.text);
-                    resolve(response);
-                }
-            });
+                .get(url)
+                .set("Accept", "application/json")
+                .set("Authorization", "Bearer " + token)
+                .end((error, res) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        const response: Rules = JSON.parse(res.text);
+                        resolve(response);
+                    }
+                });
         });
     }
 
@@ -195,17 +413,17 @@ export class PersoniumClient {
             const token = _token || this.token;
             const cellUrl = this.createCellSchema(cell);
             const toUrl = this.createCellSchema(to);
-            const url = this.createCellSchema(cell)+"__message/send/"; 
+            const url = this.createCellSchema(cell) + "__message/send/";
 
             let body = {};
 
-            if(type.lastIndexOf("req.rule.", 0) === 0) {
+            if (type.lastIndexOf("req.rule.", 0) === 0) {
                 body = {
                     To: toUrl,
                     Type: type,
                     RequestRule: requestContent,
                 };
-            }else if(type.lastIndexOf("req.role.", 0) === 0){
+            } else if (type.lastIndexOf("req.role.", 0) === 0) {
                 body = {
                     To: toUrl,
                     Type: type,
@@ -215,125 +433,144 @@ export class PersoniumClient {
             }
 
             request
-            .post(url)
-            .set("Accept", "application/json")
-            .set("Authorization", "Bearer "+token)
-            .send(body)
-            .end((error, res)=>{
-                if(error){
-                    reject(error);
-                }
-                else {
-                    resolve(JSON.parse(res.text));
-                }
-            });
+                .post(url)
+                .set("Accept", "application/json")
+                .set("Authorization", "Bearer " + token)
+                .send(body)
+                .end((error, res) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(JSON.parse(res.text));
+                    }
+                });
         });
     }
 
-    getProfile(cell: string){
+    getProfile(cell: string) {
         return new Promise<PersoniumProfileResponse>((resolve, reject) => {
             const cellurl = this.createCellSchema(cell);
-            const url = cellurl+"__/profile.json"; 
+            const url = cellurl + "__/profile.json";
             request
-            .get(url)
-            .set("Accept", "application/json")
-            .end((error, res)=>{
-                if(error){
-                    reject(error);
-                }
-                else {
-                    const response: PersoniumProfileResponse = JSON.parse(res.text);
-                    resolve(response);
-                }
-            });
+                .get(url)
+                .set("Accept", "application/json")
+                .end((error, res) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        const response: PersoniumProfileResponse = JSON.parse(res.text);
+                        resolve(response);
+                    }
+                });
         });
     }
 
     isExist(cell: string, path: string, __id: string, _token?: string) {
         return new Promise<boolean>((resolve, reject) => {
             const token = _token || this.token;
-            const url = this.createCellSchema(cell)+path+"('"+__id+"')";
+            const url = this.createCellSchema(cell) + path + "('" + __id + "')";
             request
-            .get(url)
-            .set("Accept", "application/json")
-            .set("Authorization", "Bearer "+token)
-            .end((error, res)=>{
-                if(error){
-                    resolve(false);
-                }
-                else {
-                    resolve(true);
-                }
-            });
+                .get(url)
+                .set("Accept", "application/json")
+                .set("Authorization", "Bearer " + token)
+                .end((error, res) => {
+                    if (error) {
+                        resolve(false);
+                    }
+                    else {
+                        resolve(true);
+                    }
+                });
         });
     }
 
     //エンティティ取得
-    get(cell: string, path: string, query?: string, _token?: string){
-        return new Promise<PersoniumData[]>((resolve, reject) => {
+    get(cell: string, path: string, query?: string, _token?: string) {
+        return new Promise<PersoniumData[] | PersoniumData>((resolve, reject) => {
             const token = _token || this.token;
-            let url = this.createCellSchema(cell)+path;
-            if(query) {
-                url += "?"+"\$orderby="+toEscapeSequence(query);
-            }else {
+            let url = this.createCellSchema(cell) + path;
+            if (query) {
+                url += "?" + "\$orderby=" + Encode(query);
+            } else {
                 url += "?\orderby=__updated%20desc";
             }
             request
-            .get(url)
-            .set("Accept", "application/json")
-            .set("Authorization", "Bearer "+token)
-            .end((error, res)=>{
-                if(error){
-                    reject(error);
-                }
-                else {
-                    const response: PersoniumResponse = JSON.parse(res.text);
-                    resolve(response.d.results);
-                }
-            });
+                .get(url)
+                .set("Accept", "application/json")
+                .set("Authorization", "Bearer " + token)
+                .end((error, res) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        const response: PersoniumResponse = JSON.parse(res.text);
+                        resolve(response.d.results);
+                    }
+                });
         });
     }
 
     //エンティティ書き込み
-    post(cell: string, path: string, entity: any, _token?: string){
+    post(cell: string, path: string, entity: any, _token?: string) {
         return new Promise<any>((resolve, reject) => {
             const token = _token || this.token;
-            const url = this.createCellSchema(cell)+path;
+            const url = this.createCellSchema(cell) + path;
             request
-            .post(url)
-            .set("Accept", "application/json")
-            .set("Authorization", "Bearer "+token)
-            .send(entity)
-            .end((error, res)=>{
-                if(error){
-                    reject(error);
-                }
-                else {
-                    const response: PersoniumResponse = JSON.parse(res.text);
-                    resolve(response.d.results);
-                }
-            });
+                .post(url)
+                .set("Accept", "application/json")
+                .set("Authorization", "Bearer " + token)
+                .send(entity)
+                .end((error, res) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        const response: PersoniumResponse = JSON.parse(res.text);
+                        resolve(response.d.results);
+                    }
+                });
         });
     }
 
     //エンティティ上書き
-    update(cell: string, path: string, id: string, entity: any, _token?: string){
+    update(cell: string, path: string, id: string, entity: any, _token?: string) {
         return new Promise<any>((resolve, reject) => {
             const token = _token || this.token;
-            const url = this.createCellSchema(cell)+path+"('"+id+"')";
+            const url = this.createCellSchema(cell) + path + "('" + id + "')";
             request
-            .put(url)
-            .set("Accept", "application/json")
-            .set("Authorization", "Bearer "+token)
-            .send(entity)
-            .end((error, res)=>{
-                if(error){
-                    reject(error);
-                }
-                else {
-                    resolve(true);
-                }
-            });
+                .put(url)
+                .set("Accept", "application/json")
+                .set("Authorization", "Bearer " + token)
+                .send(entity)
+                .end((error, res) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(true);
+                    }
+                });
+        });
+    }
+
+    delete(cell: string, path: string, id: string, _token?: string) {
+        return new Promise<any>((resolve, reject) => {
+            const token = _token || this.token;
+            const url = this.createCellSchema(cell) + path + "('" + id + "')";
+            request
+                .delete(url)
+                .set("Accept", "application/json")
+                .set("Authorization", "Bearer " + token)
+                .end((error, res) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(true);
+                    }
+                });
         });
     }
 
@@ -342,7 +579,7 @@ export class PersoniumClient {
     }
 
     extractCellName(url: string) {
-        const cell = url.substring(url.indexOf(this.host)+this.host.length+1, url.lastIndexOf("/"));
+        const cell = url.substring(url.indexOf(this.host) + this.host.length + 1, url.lastIndexOf("/"));
         return cell;
     }
 

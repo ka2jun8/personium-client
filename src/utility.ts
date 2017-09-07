@@ -14,7 +14,15 @@ const EscapeSequenceMap = {
     " ": "%20",
 };
 
-export const toEscapeSequence = (original: string) => {
+const reverseMap = (map) => {
+    const result = {};
+    Object.keys(map).forEach((key)=>{
+        result[map[key]] = key;
+    });
+    return result;
+};
+
+export const Encode = (original: string) => {
     let resultArray = splitWord(original);
     resultArray = resultArray.map((character) => {
         if(EscapeSequenceMap[character]){
@@ -25,4 +33,20 @@ export const toEscapeSequence = (original: string) => {
     });
     const result = resultArray.join("");
     return result;
+};
+
+export const Decode = (original: string) => {
+    let index = -2;
+    const ReverseSequenceMap = reverseMap(EscapeSequenceMap);
+    let sentence = original;
+    while(index !== -1) {
+        index = sentence.indexOf("%");
+        if(index >= 0) {
+            const target = sentence.substring(index, index+5);
+            const before = sentence.substring(0, index);
+            const after = sentence.substring(index+5);
+            sentence = before + ReverseSequenceMap[target] + after;
+        }
+    }
+    return sentence;
 };
