@@ -48,35 +48,6 @@ export interface Rules {
 export interface Link extends PersoniumData {
     uri: string;
 }
-export interface Role extends PersoniumData {
-    Name: string;
-    "_Box.Name": string;
-    _Box: {
-        __deferred: {
-            uri: string;
-        };
-    };
-    _Account: {
-        __deferred: {
-            uri: string;
-        };
-    };
-    _ExtCell: {
-        __deferred: {
-            uri: string;
-        };
-    };
-    _ExtRole: {
-        __deferred: {
-            uri: string;
-        };
-    };
-    _Relation: {
-        __deferred: {
-            uri: string;
-        };
-    };
-}
 export interface PersoniumProfileResponse {
     DisplayName: string;
     Description: string;
@@ -90,9 +61,6 @@ export declare class PersoniumClient {
     constructor(unit: string);
     login(cell: string, username: string, password: string): Promise<PersoniumAccessToken>;
     refreshAccessToken(cell: string, refreshToken: string, target?: string): Promise<PersoniumAccessToken>;
-    createRole(cell: string, role: string, box?: string, _token?: string): Promise<boolean>;
-    getRole(cell: string, role?: string, box?: string, _token?: string): Promise<Role | Role[]>;
-    deleteRole(cell: string, role?: string, box?: string, _token?: string): Promise<boolean>;
     setExtCell(cell: string, setCellUrl: string, _token?: string): Promise<boolean>;
     getExtCellList(cell: string, _token?: string): Promise<ExtCell[]>;
     deleteExtCell(cell: string, deleteCellUrl: string, _token?: string): Promise<boolean>;
@@ -103,7 +71,7 @@ export declare class PersoniumClient {
     sendMessage(cell: string, to: string, type: string, requestContent: string, _token?: string): Promise<PersoniumProfileResponse>;
     getProfile(cell: string): Promise<PersoniumProfileResponse>;
     isExist(cell: string, path: string, __id: string, _token?: string): Promise<boolean>;
-    get(cell: string, path: string, query?: string, _token?: string): Promise<PersoniumData | PersoniumData[]>;
+    get(cell: string, path: string, query?: string, _token?: string): Promise<PersoniumData[]>;
     post(cell: string, path: string, entity: any, _token?: string): Promise<any>;
     update(cell: string, path: string, id: string, entity: any, _token?: string): Promise<any>;
     delete(cell: string, path: string, id: string, _token?: string): Promise<any>;
