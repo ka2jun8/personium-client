@@ -9,20 +9,20 @@ let personiumHostName = config.host;
 interface Entity1 {
     name: string;
     flag: boolean;
-    date: string;
+    date: number;
 };
 
 interface Entity2 extends PersoniumData {
     __id: string;
     name: string;
     flag: boolean;
-    date: string;
+    date: number;
 }
 
-describe("Personium-client Test", () => {
-    let client: PersoniumClient = null;
-    let token: PersoniumAccessToken = null;
+let client: PersoniumClient = null;
+let token: PersoniumAccessToken = null;
 
+describe("Personium-client Instantiation Test", () => {
     it("instantiation", (done) => {
         try{
             client = new PersoniumClient(personiumHostName);
@@ -33,7 +33,9 @@ describe("Personium-client Test", () => {
             console.error(e);
         }
     });
+});
 
+describe("Personium-client Basic Test", () => {
     it("login", (done) => {
         client.login(config.cell, config.username, config.password)
             .then((response) => {
@@ -52,7 +54,7 @@ describe("Personium-client Test", () => {
         const entity: Entity1 = {
             name: "テスト",
             flag: false,
-            date: moment().unix() + "000",
+            date: moment().unix(),
         };
         client.post(config.cell, config.entity, entity).then((result) => {
             assert(result);
@@ -272,6 +274,98 @@ describe("Personium-client Test", () => {
         });
     });
 
+});
+
+describe("Personium-client Test Part2", () => {
+    it("login", (done) => {
+        client.login(config.cell, config.username, config.password)
+            .then((response) => {
+                token = response;
+                assert(true);
+                done();
+            }).catch((error) => {
+                assert(false);
+                console.error(error);
+                done();
+            });
+    });
+
+    let entities = [];
+    it("post for query test", (done) => {
+        const _entities: Entity1[] = [{
+            name: "テスト",
+            flag: false,
+            date: moment().add(-2, "day").unix(),
+        },{
+            name: "テスト2",
+            flag: false,
+            date: moment().add(-1, "day").unix(),
+        },{
+            name: "テスト3",
+            flag: true,
+            date: moment().add(1, "day").unix(),
+        }];
+        const promises = _entities.map((entity)=>{
+            return client.post(config.cell, config.entity, entity)
+        });
+        Promise.all(promises)
+        .then((results)=>{
+            entities = results;
+            assert(true);
+            done();
+        }).catch((e)=>{
+            assert(false);
+            console.error(e);
+            done();
+        });
+    });
+
+    it("get with $filter", (done)=>{
+        const query = {
+            filter: ["date gt "+moment().unix()],
+        };
+        client.get(config.cell, config.entity, query).then((results: Entity2[]) => {
+            assert(results.length === 1);
+            done();
+        }).catch((e) => {
+            assert(false);
+            console.error(e);
+            done();
+        }); 
+    });
+
+    it("get with $filter2", (done)=>{
+        const query = {
+            filter: ["date gt "+moment().add(-1, "day").unix(), "date lt "+moment().unix()],
+        };
+        client.get(config.cell, config.entity, query).then((results: Entity2[]) => {
+            assert(results.length === 1);
+            done();
+        }).catch((e) => {
+            assert(false);
+            console.error(e);
+            done();
+        }); 
+    });
+
+    it("delete all data", (done) => {
+        const promises = entities.map((entity)=>{
+            return client.delete(config.cell, config.entity, entity.__id);
+        });
+        Promise.all(promises)
+        .then((results) => {
+            assert(results);
+            done();
+        }).catch((e) => {
+            assert(false);
+            console.error(e);
+            done();
+        });
+    });
+
+
+});
+
     /**
      * refreshAccessToken
      * getProfile
@@ -279,5 +373,3 @@ describe("Personium-client Test", () => {
      * sendMessage
      */
 
-
-});

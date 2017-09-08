@@ -1,5 +1,5 @@
 import * as request from "superagent";
-import { Encode, Decode } from "./utility";
+import { Encode, Decode, convertQueriedUrl, Query } from "./utility";
 
 //for using Promise on es5
 import { Promise } from "es6-promise";
@@ -487,14 +487,16 @@ export class PersoniumClient {
     }
 
     //エンティティ取得
-    get(cell: string, path: string, query?: string, _token?: string) {
+    get(cell: string, path: string, query?: Query|string, _token?: string) {
         return new Promise<PersoniumData[] | PersoniumData>((resolve, reject) => {
             const token = _token || this.token;
             let url = this.createCellSchema(cell) + path;
-            if (query) {
-                url += "?" + "\$orderby=" + Encode(query);
+            if (typeof query === "string") {
+                url += Encode("?$orderby=" + query);
+            } else if(query){
+                url = convertQueriedUrl(url, query);
             } else {
-                url += "?\orderby=__updated%20desc";
+                url += Encode("?$orderby=__updated%20desc");
             }
             request
                 .get(url)
@@ -636,3 +638,5 @@ export class PersoniumClient {
 //   });
 // };
 // */
+
+module.exports = PersoniumClient;

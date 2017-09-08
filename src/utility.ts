@@ -12,6 +12,8 @@ const EscapeSequenceMap = {
     ":": "%3A",
     "/": "%2F",
     " ": "%20",
+    "$": "%24",
+    "\\": "%5C",
 };
 
 const reverseMap = (map) => {
@@ -50,3 +52,32 @@ export const Decode = (original: string) => {
     }
     return sentence;
 };
+
+export interface Query {
+    format?: string,
+    expand?: string,
+    select?: string,
+    orderby?: string,
+    top?: string,
+    skip?: string,
+    filter?: string[],
+    inlinecount?: string,
+    q?: string,
+}
+
+const AND = " and ";
+
+export const convertQueriedUrl = (url: string, query: Query): string => {
+    let result = url + "?";
+    if(query.filter && query.filter.length > 0) {
+        const filters = query.filter;
+        result += Encode("$filter=");
+        filters.forEach((filter)=>{
+            result += Encode(filter);
+            result += AND;
+        });
+        result = result.substring(0, result.indexOf(AND));
+    }
+    return result;
+}
+
