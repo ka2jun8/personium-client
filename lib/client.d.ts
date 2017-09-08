@@ -1,3 +1,4 @@
+import { Query } from "./utility";
 export interface PersoniumAccessToken {
     access_token: string;
     refresh_token: string;
@@ -103,10 +104,11 @@ export declare class PersoniumClient {
     sendMessage(cell: string, to: string, type: string, requestContent: string, _token?: string): Promise<PersoniumProfileResponse>;
     getProfile(cell: string): Promise<PersoniumProfileResponse>;
     isExist(cell: string, path: string, __id: string, _token?: string): Promise<boolean>;
-    get(cell: string, path: string, query?: string, _token?: string): Promise<PersoniumData | PersoniumData[]>;
+    get(cell: string, path: string, query?: Query | string, _token?: string): Promise<PersoniumData | PersoniumData[]>;
     post(cell: string, path: string, entity: any, _token?: string): Promise<any>;
     update(cell: string, path: string, id: string, entity: any, _token?: string): Promise<any>;
     delete(cell: string, path: string, id: string, _token?: string): Promise<any>;
     createCellSchema(cell: string): string;
     extractCellName(url: string): string;
 }
+export default PersoniumClient;
