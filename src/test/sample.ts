@@ -1,6 +1,7 @@
 import * as moment from "moment";
 import * as assert from "power-assert";
-import { PersoniumClient, PersoniumAccessToken, PersoniumData, ExtCell, Link } from "../client";
+import { PersoniumAccessToken, PersoniumData, ExtCell, Link } from "../client";
+const PersoniumClient = require("../../lib/personium-client");
 const config = require("./config");
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
@@ -19,7 +20,7 @@ interface Entity2 extends PersoniumData {
     date: number;
 }
 
-let client: PersoniumClient = null;
+let client: any = null;
 let token: PersoniumAccessToken = null;
 
 describe("Personium-client Instantiation Test", () => {
@@ -29,8 +30,8 @@ describe("Personium-client Instantiation Test", () => {
             assert(true);
             done();
         }catch(e){
-            assert(false);
             console.error(e);
+            assert(false);
         }
     });
 });
