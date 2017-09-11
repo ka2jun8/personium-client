@@ -100,16 +100,20 @@ export interface PersoniumProfileResponse {
 }
 
 export class PersoniumClient {
+    protocol: string = "https";
     host: string = null;
     personiumToken: PersoniumAccessToken = null;
     token: string = null;
 
-    constructor(unit: string) {
+    constructor(unit: string, protocol?: string) {
         if (!unit) {
             console.warn("Please set `host` address");
         }
         else if (unit.lastIndexOf("http") === 0) {
             console.warn("`host` does not need protocol prefix");
+        }
+        if(protocol){
+            this.protocol = protocol;
         }
         this.host = unit;
     }
@@ -577,7 +581,7 @@ export class PersoniumClient {
     }
 
     createCellSchema(cell: string) {
-        return `https://${this.host}/${cell}/`;
+        return `${this.protocol}://${this.host}/${cell}/`;
     }
 
     extractCellName(url: string) {
