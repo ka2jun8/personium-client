@@ -85,10 +85,11 @@ export interface PersoniumProfileResponse {
     ProfileImageName: string;
 }
 export declare class PersoniumClient {
+    protocol: string;
     host: string;
     personiumToken: PersoniumAccessToken;
     token: string;
-    constructor(unit: string);
+    constructor(unit: string, protocol?: string);
     login(cell: string, username: string, password: string): Promise<PersoniumAccessToken>;
     refreshAccessToken(cell: string, refreshToken: string, target?: string): Promise<PersoniumAccessToken>;
     createRole(cell: string, role: string, box?: string, _token?: string): Promise<boolean>;
@@ -111,4 +112,3 @@ export declare class PersoniumClient {
     createCellSchema(cell: string): string;
     extractCellName(url: string): string;
 }
-export default PersoniumClient;
