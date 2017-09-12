@@ -1,7 +1,7 @@
 import * as moment from "moment";
 import * as assert from "power-assert";
-import { PersoniumAccessToken, PersoniumData, ExtCell, Link } from "../client";
-const PersoniumClient = require("../../lib/personium-client");
+import {PersoniumClient, PersoniumAccessToken, PersoniumData, ExtCell, Link } from "../client";
+// const PersoniumClient = require("../../lib/personium-client");
 const config = require("./config");
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 

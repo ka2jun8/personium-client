@@ -16,7 +16,7 @@
         var cell = "Boss";
         var username = "boss1";
         var password = "piyopiyo";
-        var client = new PersoniumClient(host);
+        var client = new PersoniumClient.PersoniumClient(host);
         client.login(cell, username, password).then(function (token) {
             console.log("client login ok");
             access_token = token.access_token;
