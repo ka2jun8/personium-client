@@ -89,8 +89,15 @@ export declare class PersoniumClient {
     host: string;
     personiumToken: PersoniumAccessToken;
     token: string;
+    expireIn: number;
+    loginTime: number;
+    expireCallback: () => void;
     constructor(unit: string, protocol?: string);
-    login(cell: string, username: string, password: string): Promise<PersoniumAccessToken>;
+    /**
+     * TODO 認証の有効性を確認すべき
+     */
+    authValidate(): boolean;
+    login(cell: string, username: string, password: string, expireCallback?: () => void): Promise<PersoniumAccessToken>;
     refreshAccessToken(cell: string, refreshToken: string, target?: string): Promise<PersoniumAccessToken>;
     createRole(cell: string, role: string, box?: string, _token?: string): Promise<boolean>;
     getRole(cell: string, role?: string, box?: string, _token?: string): Promise<Role | Role[]>;
