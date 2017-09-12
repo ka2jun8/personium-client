@@ -104,6 +104,9 @@ export class PersoniumClient {
     host: string = null;
     personiumToken: PersoniumAccessToken = null;
     token: string = null;
+    expireIn: number = 3600;
+    loginTime: number = 0;
+    expireCallback: ()=>void;
 
     constructor(unit: string, protocol?: string) {
         if (!unit) {
@@ -118,9 +121,22 @@ export class PersoniumClient {
         this.host = unit;
     }
 
-    login(cell: string, username: string, password: string) {
+    /**
+     * TODO 認証の有効性を確認すべき
+     */
+    authValidate(): boolean {
+        const result = (+new Date()-this.loginTime)/1000 < this.expireIn;
+        if(!result) {
+            this.expireCallback && this.expireCallback();
+            console.warn("Maybe you have to re-login while your token is expired");
+        }
+        return result;
+    }
+
+    login(cell: string, username: string, password: string, expireCallback?: ()=>void) {
         return new Promise<PersoniumAccessToken>((resolve, reject) => {
             const url = this.createCellSchema(cell) + "__token";
+            this.expireCallback = expireCallback && expireCallback;
             request
                 .post(url)
                 .set("Accept", "application/json")
@@ -134,6 +150,8 @@ export class PersoniumClient {
                         const token = JSON.parse(res.text);
                         this.personiumToken = token;
                         this.token = token.access_token;
+                        this.expireIn = token.expire_in;
+                        this.loginTime = +new Date();
                         resolve(token);
                     }
                 });
