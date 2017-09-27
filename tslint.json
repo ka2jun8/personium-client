@@ -7,7 +7,7 @@
         "class-name": true,
         "curly": true,
         "forin": true,
-        "no-var-keyword": true,
+        "no-var-keyword": false,
         "no-console": [false, "log"]
     }
 }
