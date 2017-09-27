@@ -46,3 +46,6 @@ npm install
 tsc
 ```
 
+### API document
+- https://github.labs.fujitsu.com/pages/rspf/personium-client/
+
