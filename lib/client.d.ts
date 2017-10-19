@@ -118,6 +118,15 @@ export interface PersoniumProfileResponse {
     Image: string;
     ProfileImageName: string;
 }
+export interface PersoniumLaunchJson {
+    personal: {
+        web: string;
+        android: string;
+        ios: string;
+        appTokenId: string;
+        appTokenPw: string;
+    };
+}
 /**
  * メッセージ送信のタイプ型
  */
@@ -172,6 +181,16 @@ export declare class PersoniumClient {
      * @param expireCallback 有効期限が切れ際に呼び出すコールバック
      */
     login(cell: string, username: string, password: string, expireCallback?: () => void): Promise<PersoniumAccessToken>;
+    /**
+     * schema認証トークンの取得
+     * @param cell 個人のセル
+     * @param username ユーザ名
+     * @param password パスワード
+     * @param appCell アプリセル
+     * @param appId アプリセルId
+     * @param appPass アプリセルPass
+     */
+    appLogin(cell: string, username: string, password: string, appCell: string, appId: string, appPass: string): Promise<PersoniumAccessToken>;
     /**
      * アクセストークンの更新やトランスセルトークンを作成
      * @param cell セル名
@@ -271,6 +290,12 @@ export declare class PersoniumClient {
      * @param cell
      */
     getProfile(cell: string): Promise<PersoniumProfileResponse>;
+    /**
+     * アプリセル専用
+     * アプリ起動情報を取得
+     * @param cell
+     */
+    getLaunch(cell: string): Promise<PersoniumLaunchJson>;
     /**
      * エンティティデータの存在確認
      * @param cell セル名
