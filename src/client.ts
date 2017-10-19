@@ -133,6 +133,16 @@ export interface PersoniumProfileResponse {
     ProfileImageName: string,
 }
 
+export interface PersoniumLaunchJson {
+    personal: {
+        web: string,
+        android: string,
+        ios: string,
+        appTokenId: string,
+        appTokenPw: string,
+    }
+}
+
 /**
  * メッセージ送信のタイプ型
  */
@@ -240,6 +250,55 @@ export class PersoniumClient {
                 });
         })
     }
+
+    /**
+     * schema認証トークンの取得
+     * @param cell 個人のセル 
+     * @param username ユーザ名
+     * @param password パスワード
+     * @param appCell アプリセル
+     * @param appId アプリセルId
+     * @param appPass アプリセルPass
+     */
+    appLogin(cell: string, username: string, password: string, appCell: string, appId: string, appPass: string) {
+        return new Promise<PersoniumAccessToken>((resolve, reject) => {
+            const cellUrl = this.createCellSchema(cell);
+            const appCellUrl = this.createCellSchema(appCell);
+            const appCellTokenUrl = appCellUrl + "__token";
+            request
+                .post(appCellTokenUrl)
+                .set("Accept", "application/json")
+                .type("form")
+                .send({ grant_type: "password", username: appId, password: appPass, p_target: cellUrl })
+                .end((error, res) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        const appToken: PersoniumAccessToken = JSON.parse(res.text);
+                        const schemaTokenUrl = cellUrl + "__token";
+                        request
+                        .post(schemaTokenUrl)
+                        .set("Accept", "application/json")
+                        .type("form")
+                        .send({ grant_type: "password", username, password, client_id: appCellUrl, client_secret: appToken.access_token })
+                        .end((error, res) => {
+                            if (error) {
+                                reject(error);
+                            }
+                            else {
+                                const token: PersoniumAccessToken = JSON.parse(res.text);
+                                this.personiumToken = token;
+                                this.token = token.access_token;
+                                this.expireIn = token.expire_in;
+                                this.loginTime = +new Date();
+                                resolve(token);
+                            }
+                        });
+                    }
+                });
+        })
+    }    
 
     /**
      * アクセストークンの更新やトランスセルトークンを作成
@@ -651,6 +710,30 @@ export class PersoniumClient {
                     }
                     else {
                         const response: PersoniumProfileResponse = JSON.parse(res.text);
+                        resolve(response);
+                    }
+                });
+        });
+    }
+
+    /**
+     * アプリセル専用
+     * アプリ起動情報を取得
+     * @param cell 
+     */
+    getLaunch(cell: string) {
+        return new Promise<PersoniumLaunchJson>((resolve, reject) => {
+            const cellurl = this.createCellSchema(cell);
+            const url = cellurl + "__/launch.json";
+            request
+                .get(url)
+                .set("Accept", "application/json")
+                .end((error, res) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        const response: PersoniumLaunchJson = JSON.parse(res.text);
                         resolve(response);
                     }
                 });
