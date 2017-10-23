@@ -741,16 +741,55 @@ export class PersoniumClient {
     }
 
     /**
+     * Barインストール 
+     * @param barUrl
+     */
+    barInstall(cell: string, box: string, barUrl: string, _token?: string) {
+        return new Promise<boolean>((resolve, reject) => {
+            const token = _token || this.token;
+            const cellurl = this.createCellSchema(cell);
+            const url = cellurl + box;
+
+            request.get(barUrl)
+                .responseType("blob")
+                .end((error, res1) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        const file = res1.body;
+                        const xhr = new XMLHttpRequest();
+                        xhr.open("MKCOL", url, true);
+                        xhr.onreadystatechange = ()=>{
+                            if(xhr.readyState === 4) {
+                                const b = xhr.responseText;
+                                resolve(true);
+                            }
+                        };
+                        xhr.setRequestHeader("Content-Type", "application/zip");
+                        xhr.setRequestHeader("Authorization", "Bearer "+token)
+                        xhr.send(file);
+                    }
+                });
+        });
+    }
+
+    /**
      * エンティティデータの存在確認
      * @param cell セル名
      * @param path パス
      * @param ___id エンティティid
      * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
      */
-    isExist(cell: string, path: string, __id: string, _token?: string): Promise<boolean> {
+    isExist(cell: string, path: string, __id?: string, _token?: string): Promise<boolean> {
         return new Promise<boolean>((resolve, reject) => {
             const token = _token || this.token;
-            const url = this.createCellSchema(cell) + path + "('" + __id + "')";
+            let url = null;
+            if(__id){
+                url = this.createCellSchema(cell) + path + "('" + __id + "')";
+            }else {
+                url = this.createCellSchema(cell) + path;
+            }
             request
                 .get(url)
                 .set("Accept", "application/json")
