@@ -297,13 +297,18 @@ export declare class PersoniumClient {
      */
     getLaunch(cell: string): Promise<PersoniumLaunchJson>;
     /**
+     * Barインストール
+     * @param barUrl
+     */
+    barInstall(cell: string, box: string, barUrl: string, _token?: string): Promise<boolean>;
+    /**
      * エンティティデータの存在確認
      * @param cell セル名
      * @param path パス
      * @param ___id エンティティid
      * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
      */
-    isExist(cell: string, path: string, __id: string, _token?: string): Promise<boolean>;
+    isExist(cell: string, path: string, __id?: string, _token?: string): Promise<boolean>;
     /**
      * エンティティ取得
      * @param cell 対象セル名
