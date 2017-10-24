@@ -113,8 +113,14 @@ export interface Role extends PersoniumData {
  * 公開されているプロフィール情報のレスポンス型
  */
 export interface PersoniumProfileResponse {
-    DisplayName: string;
-    Description: string;
+    DisplayName: {
+        en: string;
+        ja: string;
+    };
+    Description: {
+        en: string;
+        ja: string;
+    };
     Image: string;
     ProfileImageName: string;
 }
