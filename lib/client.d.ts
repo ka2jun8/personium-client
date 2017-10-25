@@ -48,12 +48,29 @@ export interface ExtCell extends PersoniumData {
  * //変わるかも
  */
 export interface Rule {
-    name: string;
-    service: string;
-    action: string;
-    doaction: string;
-    object: string;
-    extservice: string;
+    External?: boolean;
+    Service: string;
+    Action: string;
+    Type: string;
+    Object: string;
+    "_Box.Name"?: string;
+}
+export interface Ace {
+    "D:principal": {
+        "D:href": string;
+    };
+    "D:grant": {
+        privilege: {
+            [aceType: string]: {};
+        }[];
+    };
+}
+export interface Acl {
+    "@": {
+        "xmlns:D": "DAV:";
+        "xmlns:p": "urn:x-personium:xmlns";
+    };
+    "D:ace": Ace[];
 }
 /**
  * スクリプトの型
@@ -62,14 +79,6 @@ export interface Rule {
 export interface Script {
     name: string;
     uri: string;
-}
-/**
- * ルールの型
- * //変わるかも
- */
-export interface Rules {
-    rules: Rule[];
-    scripts: Script[];
 }
 /**
  * Link型 ExtCellのLinkなど
@@ -281,7 +290,14 @@ export declare class PersoniumClient {
      * @param cell セル名
      * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
      */
-    getRules(cell: string, _token?: string): Promise<Rules>;
+    getRules(cell: string, _token?: string): Promise<Rule[]>;
+    /**
+     * ルールを設定する
+     * @param cell 対象セル
+     * @param rule 登録するルール
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    setRule(cell: string, rule: Rule, _token?: string): Promise<boolean>;
     /**
      * メッセージの送信API
      * @param cell セル名
@@ -290,7 +306,17 @@ export declare class PersoniumClient {
      * @param requestContent 登録依頼した関係情報(URL)
      * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
      */
-    sendMessage(cell: string, to: string, type: MessageSendType, requestContent: string, _token?: string): Promise<PersoniumProfileResponse>;
+    sendMessage(cell: string, to: string, type: MessageSendType, requestContent: Rule | string, _token?: string): Promise<any>;
+    /**
+     * TODO receiveMessage
+     */
+    receiveMessage(): void;
+    /**
+     * ACLを設定する
+     * @param cell 対象セル
+     * @param acl 設定するACLのjson(XMLに変換)
+     */
+    setAcl(cell: string, aces: Ace[], targetPath?: string, _token?: string): Promise<boolean>;
     /**
      * プロファイル情報を取得
      * @param cell
