@@ -1,4 +1,5 @@
 import * as request from "superagent";
+import * as js2xml from "js2xmlparser";
 import { Encode, Decode, convertQueriedUrl, Query } from "./utility";
 
 //for using Promise on es5
@@ -57,12 +58,28 @@ export interface ExtCell extends PersoniumData {
  * //変わるかも
  */
 export interface Rule {
-    name: string,
-    service: string,
-    action: string,
-    doaction: string,
-    object: string,
-    extservice: string,
+    External?: boolean,
+    Service: string,
+    Action: string,
+    Type: string,
+    Object: string,
+    "_Box.Name"?: string,
+}
+
+export interface Ace {
+    "D:principal": {
+        "D:href": string,
+    },
+    "D:grant": {
+        privilege: {[aceType: string]: {}}[],
+    },
+}
+export interface Acl {
+    "@": {
+        "xmlns:D": "DAV:",
+        "xmlns:p": "urn:x-personium:xmlns",
+    },
+    "D:ace": Ace[],
 }
 
 /**
@@ -72,15 +89,6 @@ export interface Rule {
 export interface Script {
     name: string,
     uri: string,
-}
-
-/**
- * ルールの型
- * //変わるかも
- */
-export interface Rules {
-    rules: Rule[],
-    scripts: Script[],
 }
 
 /**
@@ -626,9 +634,9 @@ export class PersoniumClient {
      * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
      */
     getRules(cell: string, _token?: string) {
-        return new Promise<Rules>((resolve, reject) => {
+        return new Promise<Rule[]>((resolve, reject) => {
             const token = _token || this.token;
-            const url = this.createCellSchema(cell) + "__rule/";
+            const url = this.createCellSchema(cell) + "__ctl/Rule";
             request
                 .get(url)
                 .set("Accept", "application/json")
@@ -638,10 +646,36 @@ export class PersoniumClient {
                         reject(error);
                     }
                     else {
-                        const response: Rules = JSON.parse(res.text);
-                        resolve(response);
+                        const response: PersoniumResponse = JSON.parse(res.text);
+                        resolve(response.d.results);
                     }
                 });
+        });
+    }
+
+    /**
+     * ルールを設定する
+     * @param cell 対象セル
+     * @param rule 登録するルール
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    setRule(cell: string, rule: Rule, _token?: string) {
+        return new Promise<boolean>((resolve, reject) => {
+            const token = _token || this.token;
+            const url = this.createCellSchema(cell) + "__ctl/Rule";
+            request
+            .post(url)
+            .set("Accept", "application/json")
+            .set("Authorization", "Bearer " + token)
+            .send(rule)
+            .end((error, res) => {
+                if (error) {
+                    reject(error);
+                }
+                else {
+                    resolve(true);
+                }
+            });
         });
     }
 
@@ -653,12 +687,12 @@ export class PersoniumClient {
      * @param requestContent 登録依頼した関係情報(URL)
      * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
      */
-    sendMessage(cell: string, to: string, type: MessageSendType, requestContent: string, _token?: string) {
-        return new Promise<PersoniumProfileResponse>((resolve, reject) => {
+    sendMessage(cell: string, to: string, type: MessageSendType, requestContent: Rule|string, _token?: string) {
+        return new Promise<any>((resolve, reject) => {
             const token = _token || this.token;
             const cellUrl = this.createCellSchema(cell);
             const toUrl = this.createCellSchema(to);
-            const url = this.createCellSchema(cell) + "__message/send/";
+            const url = cellUrl + "__message/send/";
 
             let body = {};
 
@@ -690,6 +724,45 @@ export class PersoniumClient {
                         resolve(JSON.parse(res.text));
                     }
                 });
+        });
+    }
+
+    /**
+     * TODO receiveMessage
+     */
+    receiveMessage(){}
+    
+    /**
+     * ACLを設定する
+     * @param cell 対象セル
+     * @param acl 設定するACLのjson(XMLに変換)
+     */
+    setAcl(cell: string, aces: Ace[], targetPath?: string, _token?: string) {
+        return new Promise<boolean>((resolve, reject) => {
+            const token = _token || this.token;
+            const cellurl = this.createCellSchema(cell);
+            const url = targetPath? cellurl+"/"+targetPath : cellurl;
+
+            const acl: Acl = {
+                "@": {
+                    "xmlns:D": "DAV:",
+                    "xmlns:p": "urn:x-personium:xmlns",
+                },
+                "D:ace": aces,
+            }
+            const aclXml = js2xml.parse("D:acl", acl);
+
+            const xhr = new XMLHttpRequest();
+            xhr.open("ACL", url, true);
+            xhr.onreadystatechange = ()=>{
+                if(xhr.readyState === 4) {
+                    const b = xhr.responseText;
+                    resolve(true);
+                }
+            };
+            xhr.setRequestHeader("Content-Type", "application/xml");
+            xhr.setRequestHeader("Authorization", "Bearer "+token)
+            xhr.send(aclXml);
         });
     }
 
