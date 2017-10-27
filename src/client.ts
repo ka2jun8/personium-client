@@ -542,10 +542,10 @@ export class PersoniumClient {
             const token = _token || this.token;
             const url = this.createCellSchema(cell) + "__ctl/ExtCell('" + Encode(targetCellUrl) + "')/\$links/" + type;
             let role = "";
-            if(name){
-                role = "(Name='" + name + "')";
-            }else if(name && box){
+            if(name && box){
                 role = "(Name='" + name + "',_Box.Name='" + box + "')";
+            }else if(name){
+                role = "(Name='" + name + "')";
             }
             const data = {
                 uri: this.createCellSchema(cell) + "__ctl/" + type.substring(1) + role
