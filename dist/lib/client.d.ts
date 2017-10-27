@@ -299,6 +299,14 @@ export declare class PersoniumClient {
      */
     setRule(cell: string, rule: Rule, _token?: string): Promise<boolean>;
     /**
+     * ルールを削除する
+     * @param cell 対象セル
+     * @param ruleId 削除するルールid
+     * @param box ボックスに紐づいてる場合はbox名指定
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    deleteRule(cell: string, ruleId: string, box?: string, _token?: string): Promise<boolean>;
+    /**
      * メッセージの送信API
      * @param cell セル名
      * @param to 宛先セル名
