@@ -678,7 +678,38 @@ export class PersoniumClient {
             });
         });
     }
-
+    
+    /**
+     * ルールを削除する
+     * @param cell 対象セル
+     * @param ruleId 削除するルールid
+     * @param box ボックスに紐づいてる場合はbox名指定
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    deleteRule(cell: string, ruleId: string, box?: string, _token?: string) {
+        return new Promise<boolean>((resolve, reject) => {
+            const token = _token || this.token;
+            let url = this.createCellSchema(cell) + "__ctl/Rule";
+            if(box){
+                url += "(__id='" + ruleId + "',_Box.Name='" + box + "')";
+            }else {
+                url += "(__id='" + ruleId + "')";
+            }
+            request
+            .delete(url)
+            .set("Accept", "application/json")
+            .set("Authorization", "Bearer " + token)
+            .end((error, res) => {
+                if (error) {
+                    reject(error);
+                }
+                else {
+                    resolve(true);
+                }
+            });
+        });
+    }
+    
     /**
      * メッセージの送信API
      * @param cell セル名
