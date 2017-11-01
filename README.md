@@ -47,5 +47,5 @@ tsc
 ```
 
 ### API document
-- https://github.labs.fujitsu.com/pages/rspf/personium-client/
+- https://github.labs.fujitsu.com/pages/personium-dev/personium-client/
 
