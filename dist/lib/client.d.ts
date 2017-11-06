@@ -230,7 +230,7 @@ export declare class PersoniumClient {
      * @param box 特定のボックスの特定のロールが削除したい場合は指定
      * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
      */
-    deleteRole(cell: string, role?: string, box?: string, _token?: string): Promise<boolean>;
+    deleteRole(cell: string, role: string, box?: string, _token?: string): Promise<boolean>;
     /**
      * 外部セルを設定する
      * @param cell 対象セル
@@ -280,6 +280,31 @@ export declare class PersoniumClient {
      */
     deleteExtCellLink(cell: string, targetCellUrl: string, type: string, name: string, box?: string, _token?: string): Promise<boolean>;
     /**
+     * アカウントのリンクを設定
+     * @param cell セル名
+     * @param account 対象として指定するアカウント名
+     * @param name 設定するロール名
+     * @param box 設定するロールのあるボックス名（デフォルトはメインbox）
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    setAccountLink(cell: string, account: string, name: string, box?: string, _token?: string): Promise<boolean>;
+    /**
+     * アカウントのリンクを削除
+     * @param cell セル名
+     * @param account 対象として指定するアカウント名
+     * @param name 削除するロール名
+     * @param box 削除するロールのあるボックス名（デフォルトはメインbox）
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    deleteAccountLink(cell: string, account: string, name: string, box?: string, _token?: string): Promise<boolean>;
+    /**
+     * アカウントを削除
+     * @param cell セル名
+     * @param account 対象として指定するアカウント名
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    deleteAccount(cell: string, account: string, _token?: string): Promise<boolean>;
+    /**
      * ルール一覧の取得
      * @param cell セル名
      * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
@@ -319,6 +344,56 @@ export declare class PersoniumClient {
      * @param acl 設定するACLのjson(XMLに変換)
      */
     setAcl(cell: string, aces: Ace[], targetPath?: string, _token?: string): Promise<boolean>;
+    /**
+     * サービスコレクションソース作成
+     * @param cell 対象セル
+     * @param path パス
+     * @param name Resorce名
+     * @param resource Resorce中身
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    createServiceCollection(cell: string, path: string, name: string, resource: any, _token?: string): Promise<boolean>;
+    /**
+     * サービスコレクションソース設定適用
+     * @param cell 対象セル
+     * @param path パス
+     * @param script スクリプト名(xxx.js)
+     * @param service サービス名(yyy)
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    setServiceCollection(cell: string, path: string, script: string, service: string, _token?: string): Promise<boolean>;
+    /**
+     * サービスコレクションソース削除
+     * @param cell 対象セル
+     * @param path パス
+     * @param name Resorce名
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    deleteServiceCollection(cell: string, path: string, name: string, _token?: string): Promise<boolean>;
+    /**
+     * エンティティタイプの削除
+     * @param cell 対象のセル名
+     * @param path エンティティのパス
+     * @param id エンティティid
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    deleteEntityType(cell: string, path: string, entityTypeName: string, _token?: string): Promise<any>;
+    /**
+     * Propertyの削除
+     * @param cell 対象のセル名
+     * @param path エンティティのパス
+     * @param entityType エンティティタイプの名前
+     * @param property propertyの名前
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    deleteProperty(cell: string, path: string, entityType: string, property: string, _token?: string): Promise<any>;
+    /**
+     * Boxの削除
+     * @param cell 対象のセル名
+     * @param box box名
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    deleteBox(cell: string, box: string, _token?: string): Promise<any>;
     /**
      * プロファイル情報を取得
      * @param cell
@@ -375,7 +450,7 @@ export declare class PersoniumClient {
      * @param id エンティティid
      * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
      */
-    delete(cell: string, path: string, id: string, _token?: string): Promise<any>;
+    delete(cell: string, path: string, id?: string, _token?: string): Promise<any>;
     /**
      * セル名からセルスキーマURLを作成する
      * @param cell
