@@ -425,14 +425,14 @@ export class PersoniumClient {
      * @param box 特定のボックスの特定のロールが削除したい場合は指定
      * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
      */
-    deleteRole(cell: string, role?: string, box?: string, _token?: string) {
+    deleteRole(cell: string, role: string, box?: string, _token?: string) {
         return new Promise<boolean>((resolve, reject) => {
             const token = _token || this.token;
             let url = this.createCellSchema(cell) + "__ctl/Role";
-            if (role) {
-                url += "(Name='" + role + "')";
-            }else if(role && box){
+            if (box) {
                 url += "(Name='" + role + "',_Box.Name='" + box + "')";
+            }else {
+                url += "(Name='" + role + "')";
             }
             request
                 .delete(url)
@@ -607,12 +607,104 @@ export class PersoniumClient {
         return new Promise<boolean>((resolve, reject) => {
             const token = _token || this.token;
             let role = "";
-            if(name){
-                role = "(Name='" + name + "')";
-            }else if(name && box){
+            if(box){
                 role = "(Name='" + name + "',_Box.Name='" + box + "')";
+            }else {
+                role = "(Name='" + name + "')";
             }
             const url = this.createCellSchema(cell) + "__ctl/ExtCell('" + Encode(targetCellUrl) + "')/\$links/" + type + role;
+            request
+                .delete(url)
+                .set("Accept", "application/json")
+                .set("Authorization", "Bearer " + token)
+                .end((error, res) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(true);
+                    }
+                });
+        });
+    }
+
+    /**
+     * アカウントのリンクを設定
+     * @param cell セル名
+     * @param account 対象として指定するアカウント名
+     * @param name 設定するロール名
+     * @param box 設定するロールのあるボックス名（デフォルトはメインbox）
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    setAccountLink(cell: string, account: string, name: string, box?: string, _token?: string) {
+        return new Promise<boolean>((resolve, reject) => {
+            const token = _token || this.token;
+            let role = this.createCellSchema(cell)+"__ctl/Role";
+            if(box){
+                role = "(Name='" + name + "',_Box.Name='" + box + "')";
+            }else {
+                role = "(Name='" + name + "')";
+            }
+            const url = this.createCellSchema(cell) + "__ctl/Account('" + account + "')/\$links/_Role";
+            request
+                .delete(url)
+                .set("Accept", "application/json")
+                .set("Authorization", "Bearer " + token)
+                .send({uri: role})
+                .end((error, res) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(true);
+                    }
+                });
+        });
+    }
+
+    /**
+     * アカウントのリンクを削除
+     * @param cell セル名
+     * @param account 対象として指定するアカウント名
+     * @param name 削除するロール名
+     * @param box 削除するロールのあるボックス名（デフォルトはメインbox）
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    deleteAccountLink(cell: string, account: string, name: string, box?: string, _token?: string) {
+        return new Promise<boolean>((resolve, reject) => {
+            const token = _token || this.token;
+            let role = "";
+            if(box){
+                role = "(Name='" + name + "',_Box.Name='" + box + "')";
+            }else {
+                role = "(Name='" + name + "')";
+            }
+            const url = this.createCellSchema(cell) + "__ctl/Account('" + account + "')/\$links/_Role" + role;
+            request
+                .delete(url)
+                .set("Accept", "application/json")
+                .set("Authorization", "Bearer " + token)
+                .end((error, res) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(true);
+                    }
+                });
+        });
+    }
+
+    /**
+     * アカウントを削除
+     * @param cell セル名
+     * @param account 対象として指定するアカウント名
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    deleteAccount(cell: string, account: string, _token?: string) {
+        return new Promise<boolean>((resolve, reject) => {
+            const token = _token || this.token;
+            const url = this.createCellSchema(cell) + "__ctl/Account('" + account + "')";
             request
                 .delete(url)
                 .set("Accept", "application/json")
@@ -772,7 +864,7 @@ export class PersoniumClient {
         return new Promise<boolean>((resolve, reject) => {
             const token = _token || this.token;
             const cellurl = this.createCellSchema(cell);
-            const url = targetPath? cellurl+"/"+targetPath : cellurl;
+            const url = targetPath? cellurl+targetPath : cellurl;
 
             const acl: Acl = {
                 "@": {
@@ -797,6 +889,189 @@ export class PersoniumClient {
         });
     }
 
+    /**
+     * サービスコレクションソース作成
+     * @param cell 対象セル
+     * @param path パス
+     * @param name Resorce名
+     * @param resource Resorce中身
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    createServiceCollection(cell: string, path: string, name: string, resource: any, _token?: string) {
+        return new Promise<boolean>((resolve, reject) => {
+            const token = _token || this.token;
+            const url = this.createCellSchema(cell) + path + "/__src/" + name;
+            request
+                .put(url)
+                .set("Accept", "application/json")
+                .set("Authorization", "Bearer " + token)
+                .set("Content-Type", "text/javascript")
+                .send(resource)
+                .end((error, res) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(true);
+                    }
+                });
+        });
+    }
+
+    /**
+     * サービスコレクションソース設定適用
+     * @param cell 対象セル
+     * @param path パス
+     * @param script スクリプト名(xxx.js)
+     * @param service サービス名(yyy)
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    setServiceCollection(cell: string, path: string, script: string, service: string, _token?: string) {
+        return new Promise<boolean>((resolve, reject) => {
+            const token = _token || this.token;
+            const url = this.createCellSchema(cell) + path;
+            const prop = {
+                "@": {
+                    "xmlns:D": "DAV:",
+                    "xmlns:p": "urn:x-personium:xmlns",
+                    "xmlns:z": "http://www.w3.com/standards/z39.50/",
+                },
+                "D:set": {
+                    "D:prop": {
+                        "p:service": {
+                            "@": {
+                                "language": "JavaScript",
+                            },
+                            path: {
+                                "@": {
+                                    name: service,
+                                    src: script,
+                                },
+                            },
+                        },
+                    },
+                },
+            };
+            const propXml = js2xml.parse("D:propertyupdate", prop);
+
+            const xhr = new XMLHttpRequest();
+            xhr.open("PROPPATCH", url, true);
+            xhr.onreadystatechange = ()=>{
+                if(xhr.readyState === 4) {
+                    const b = xhr.responseText;
+                    resolve(true);
+                }
+            };
+            xhr.setRequestHeader("Content-Type", "application/xml");
+            xhr.setRequestHeader("Authorization", "Bearer "+token)
+            xhr.send(propXml);
+        });
+    }
+
+    /**
+     * サービスコレクションソース削除
+     * @param cell 対象セル
+     * @param path パス
+     * @param name Resorce名
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    deleteServiceCollection(cell: string, path: string, name: string, _token?: string) {
+        return new Promise<boolean>((resolve, reject) => {
+            const token = _token || this.token;
+            const url = this.createCellSchema(cell) + path + "/__src/" + name;
+            request
+                .delete(url)
+                .set("Accept", "application/json")
+                .set("Authorization", "Bearer " + token)
+                .end((error, res) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(true);
+                    }
+                });
+        });
+    }
+
+    /**
+     * エンティティタイプの削除
+     * @param cell 対象のセル名
+     * @param path エンティティのパス
+     * @param id エンティティid
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    deleteEntityType(cell: string, path: string, entityTypeName: string, _token?: string) {
+        return new Promise<any>((resolve, reject) => {
+            const token = _token || this.token;
+            const url = this.createCellSchema(cell) + path + "/$metadata/EntityType('" + entityTypeName + "')";
+            request
+                .delete(url)
+                .set("Accept", "application/json")
+                .set("Authorization", "Bearer " + token)
+                .end((error, res) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(true);
+                    }
+                });
+        });
+    }
+
+    /**
+     * Propertyの削除
+     * @param cell 対象のセル名
+     * @param path エンティティのパス
+     * @param entityType エンティティタイプの名前
+     * @param property propertyの名前
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    deleteProperty(cell: string, path: string, entityType: string, property: string, _token?: string) {
+        return new Promise<any>((resolve, reject) => {
+            const token = _token || this.token;
+            const url = this.createCellSchema(cell) + path + "/$metadata/Property(Name='" +property+ "',_EntityType.Name='"+entityType+"')";
+            request
+                .delete(url)
+                .set("Accept", "application/json")
+                .set("Authorization", "Bearer " + token)
+                .end((error, res) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(true);
+                    }
+                });
+        });
+    }
+
+    /**
+     * Boxの削除
+     * @param cell 対象のセル名
+     * @param box box名
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    deleteBox(cell: string, box: string, _token?: string) {
+        return new Promise<any>((resolve, reject) => {
+            const token = _token || this.token;
+            const url = this.createCellSchema(cell) + "__ctl/Box(Name='"+box+"')";            
+            request
+                .delete(url)
+                .set("Accept", "application/json")
+                .set("Authorization", "Bearer " + token)
+                .end((error, res) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(true);
+                    }
+                });
+        });
+    }
+    
     /**
      * プロファイル情報を取得
      * @param cell 
@@ -1006,10 +1281,12 @@ export class PersoniumClient {
      * @param id エンティティid
      * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
      */
-    delete(cell: string, path: string, id: string, _token?: string) {
+    delete(cell: string, path: string, id?: string, _token?: string) {
         return new Promise<any>((resolve, reject) => {
             const token = _token || this.token;
-            const url = this.createCellSchema(cell) + path + "('" + id + "')";
+            const url = id?
+                this.createCellSchema(cell) + path + "('" + id + "')":
+                this.createCellSchema(cell) + path;
             request
                 .delete(url)
                 .set("Accept", "application/json")
