@@ -196,6 +196,10 @@ export class PersoniumClient {
      * expireしたことが確認されたときに呼び出すコールバック
      */
     expireCallback: ()=>void;
+    /**
+     * expireの確認タイマー
+     */
+    expireCallbackTimer: any = null;
 
     /**
      * コンストラクタ
@@ -253,6 +257,14 @@ export class PersoniumClient {
                         this.token = token.access_token;
                         this.expireIn = token.expire_in;
                         this.loginTime = +new Date();
+
+                        // タイムアウトを見る
+                        const timeout = this.expireIn * 999; //直前に教えてあげる
+                        this.expireCallbackTimer = setTimeout(()=>{
+                            this.expireCallbackTimer = null;
+                            this.expireCallback && this.expireCallback();
+                        }, timeout);
+
                         resolve(token);
                     }
                 });
@@ -1319,6 +1331,15 @@ export class PersoniumClient {
         return cell;
     }
 
+    /**
+     * 停止時
+     */
+    dispose() {
+        if(this.expireCallbackTimer) {
+            clearTimeout(this.expireCallbackTimer);
+        }
+    }
+    
 }
 
 
