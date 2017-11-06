@@ -1,8 +1,8 @@
 {
-    "host": "personium1.pssys.flab.fujitsu.co.jp",
+    "host": "192.168.33.34",
     "cell": "HelloCell",
-    "username": "user1",
-    "password": "password",
+    "username": "test",
+    "password": "piyopiyo",
     "cell2": "HelloCell2",
     "entity": "TestBox/TestCollection/TestEntity"
 }
