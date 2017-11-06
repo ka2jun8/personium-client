@@ -173,6 +173,10 @@ export declare class PersoniumClient {
      */
     expireCallback: () => void;
     /**
+     * expireの確認タイマー
+     */
+    expireCallbackTimer: any;
+    /**
      * コンストラクタ
      * @param unit ホスト名
      * @param protocol プロトコル
@@ -461,4 +465,8 @@ export declare class PersoniumClient {
      * @param url
      */
     extractCellName(url: string): string;
+    /**
+     * 停止時
+     */
+    dispose(): void;
 }
