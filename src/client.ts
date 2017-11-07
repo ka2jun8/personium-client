@@ -195,7 +195,7 @@ export class PersoniumClient {
     /**
      * expireしたことが確認されたときに呼び出すコールバック
      */
-    expireCallback: ()=>void;
+    expireCallback: (refreshToken: string)=>void;
     /**
      * expireの確認タイマー
      */
@@ -225,7 +225,7 @@ export class PersoniumClient {
     authValidate(): boolean {
         const result = (+new Date()-this.loginTime)/1000 < this.expireIn;
         if(!result) {
-            this.expireCallback && this.expireCallback();
+            this.expireCallback && this.expireCallback(this.personiumToken.refresh_token);
             console.warn("Maybe you have to re-login while your token is expired");
         }
         return result;
@@ -238,7 +238,7 @@ export class PersoniumClient {
      * @param password パスワード
      * @param expireCallback 有効期限が切れ際に呼び出すコールバック 
      */
-    login(cell: string, username: string, password: string, expireCallback?: ()=>void) {
+    login(cell: string, username: string, password: string, expireCallback?: (refreshToken: string)=>void) {
         return new Promise<PersoniumAccessToken>((resolve, reject) => {
             const url = this.createCellSchema(cell) + "__token";
             this.expireCallback = expireCallback && expireCallback;
@@ -262,7 +262,7 @@ export class PersoniumClient {
                         const timeout = this.expireIn * 999; //直前に教えてあげる
                         this.expireCallbackTimer = setTimeout(()=>{
                             this.expireCallbackTimer = null;
-                            this.expireCallback && this.expireCallback();
+                            this.expireCallback && this.expireCallback(token.refresh_token);
                         }, timeout);
 
                         resolve(token);
