@@ -171,7 +171,7 @@ export declare class PersoniumClient {
     /**
      * expireしたことが確認されたときに呼び出すコールバック
      */
-    expireCallback: () => void;
+    expireCallback: (refreshToken: string) => void;
     /**
      * expireの確認タイマー
      */
@@ -193,7 +193,7 @@ export declare class PersoniumClient {
      * @param password パスワード
      * @param expireCallback 有効期限が切れ際に呼び出すコールバック
      */
-    login(cell: string, username: string, password: string, expireCallback?: () => void): Promise<PersoniumAccessToken>;
+    login(cell: string, username: string, password: string, expireCallback?: (refreshToken: string) => void): Promise<PersoniumAccessToken>;
     /**
      * schema認証トークンの取得
      * @param cell 個人のセル
