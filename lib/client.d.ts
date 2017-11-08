@@ -5,7 +5,7 @@ import { Query } from "./utility";
 export interface PersoniumAccessToken {
     access_token: string;
     refresh_token: string;
-    expire_in: number;
+    expires_in: number;
 }
 /**
  * Personiumのレスポンスデータ型
@@ -163,7 +163,7 @@ export declare class PersoniumClient {
     /**
      * アクセストークンの有効期限
      */
-    expireIn: number;
+    expiresIn: number;
     /**
      * ログイン時刻 - 認証の有効期限内かどうかを確認
      */
