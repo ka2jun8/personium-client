@@ -11,7 +11,7 @@ import { Promise } from "es6-promise";
 export interface PersoniumAccessToken {
     access_token: string,
     refresh_token: string,
-    expire_in: number,
+    expires_in: number,
 }
 
 /**
@@ -187,7 +187,7 @@ export class PersoniumClient {
     /**
      * アクセストークンの有効期限
      */
-    expireIn: number = 3600;
+    expiresIn: number = 3600;
     /**
      * ログイン時刻 - 認証の有効期限内かどうかを確認
      */
@@ -223,7 +223,7 @@ export class PersoniumClient {
      * 認証の有効性チェック
      */
     authValidate(): boolean {
-        const result = (+new Date()-this.loginTime)/1000 < this.expireIn;
+        const result = (+new Date()-this.loginTime)/1000 < this.expiresIn;
         if(!result) {
             this.expireCallback && this.expireCallback(this.personiumToken.refresh_token);
             console.warn("Maybe you have to re-login while your token is expired");
@@ -255,11 +255,11 @@ export class PersoniumClient {
                         const token: PersoniumAccessToken = JSON.parse(res.text);
                         this.personiumToken = token;
                         this.token = token.access_token;
-                        this.expireIn = token.expire_in;
+                        this.expiresIn = token.expires_in;
                         this.loginTime = +new Date();
 
                         // タイムアウトを見る
-                        const timeout = this.expireIn * 999; //直前に教えてあげる
+                        const timeout = Number(this.expiresIn) * 999; //直前に教えてあげる
                         this.expireCallbackTimer = setTimeout(()=>{
                             this.expireCallbackTimer = null;
                             this.expireCallback && this.expireCallback(token.refresh_token);
@@ -310,7 +310,7 @@ export class PersoniumClient {
                                 const token: PersoniumAccessToken = JSON.parse(res.text);
                                 this.personiumToken = token;
                                 this.token = token.access_token;
-                                this.expireIn = token.expire_in;
+                                this.expiresIn = token.expires_in;
                                 this.loginTime = +new Date();
                                 resolve(token);
                             }
