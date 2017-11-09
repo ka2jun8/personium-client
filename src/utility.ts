@@ -76,7 +76,7 @@ export const convertQueriedUrl = (url: string, query: Query): string => {
             result += Encode(filter);
             result += AND;
         });
-        result = result.substring(0, result.indexOf(AND));
+        result = result.substring(0, result.lastIndexOf(AND));
     }
     return result;
 }
