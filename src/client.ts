@@ -350,6 +350,15 @@ export class PersoniumClient {
                         const token = JSON.parse(res.text);
                         this.personiumToken = token;
                         this.token = token.access_token;
+                        
+                        // タイムアウトを見る
+                        this.expiresIn = token.expires_in;
+                        const timeout = Number(this.expiresIn) * 999; //直前に教えてあげる
+                        this.expireCallbackTimer = setTimeout(()=>{
+                            this.expireCallbackTimer = null;
+                            this.expireCallback && this.expireCallback(token.refresh_token);
+                        }, timeout);
+
                         resolve(token);
                     }
                 });
