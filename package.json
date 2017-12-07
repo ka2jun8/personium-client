@@ -10,7 +10,7 @@
     "build": "webpack",
     "watch": "webpack --watch",
     "test": "mocha --compilers ts:espower-typescript/guess -w src/test/*.ts",
-    "documentation": "typedoc --out docs src"
+    "documentation": "typedoc --out docs src && touch docs/.nojekyll"
   },
   "devDependencies": {
     "@types/es6-promise": "^0.0.33",
