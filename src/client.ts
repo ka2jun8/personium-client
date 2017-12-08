@@ -662,13 +662,13 @@ export class PersoniumClient {
             const token = _token || this.token;
             let role = this.createCellSchema(cell)+"__ctl/Role";
             if(box){
-                role = "(Name='" + name + "',_Box.Name='" + box + "')";
+                role += "(Name='" + name + "',_Box.Name='" + box + "')";
             }else {
-                role = "(Name='" + name + "')";
+                role += "(Name='" + name + "')";
             }
             const url = this.createCellSchema(cell) + "__ctl/Account('" + account + "')/\$links/_Role";
             request
-                .delete(url)
+                .post(url)
                 .set("Accept", "application/json")
                 .set("Authorization", "Bearer " + token)
                 .send({uri: role})
