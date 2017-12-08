@@ -67,6 +67,7 @@ export interface Query {
 
 const AND = " and ";
 
+// TODO きちんと整理する
 export const convertQueriedUrl = (url: string, query: Query): string => {
     let result = url + "?";
     if(query.filter && query.filter.length > 0) {
@@ -76,7 +77,14 @@ export const convertQueriedUrl = (url: string, query: Query): string => {
             result += Encode(filter);
             result += AND;
         });
-        result = result.substring(0, result.lastIndexOf(AND));
+        result = result.substring(0, result.lastIndexOf(AND)) + "&";
+    }else if(query.top) {
+        const top = query.top;
+        result += Encode("$top=" + top) + "&";
+    }else {
+        Object.keys(query).forEach((key)=>{
+            result += Encode(key) + "=" + Encode(query[key]) + "&";
+        });
     }
     return result;
 }
