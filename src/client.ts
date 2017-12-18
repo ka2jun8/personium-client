@@ -259,7 +259,7 @@ export class PersoniumClient {
                         this.loginTime = +new Date();
 
                         // タイムアウトを見る
-                        const timeout = Number(this.expiresIn) * 999; //直前に教えてあげる
+                        const timeout = Number(this.expiresIn) * 900; //直前に教えてあげる
                         this.expireCallbackTimer = setTimeout(()=>{
                             this.expireCallbackTimer = null;
                             this.expireCallback && this.expireCallback(token.refresh_token);
@@ -353,7 +353,7 @@ export class PersoniumClient {
                         
                         // タイムアウトを見る
                         this.expiresIn = token.expires_in;
-                        const timeout = Number(this.expiresIn) * 999; //直前に教えてあげる
+                        const timeout = Number(this.expiresIn) * 900; //直前に教えてあげる
                         this.expireCallbackTimer = setTimeout(()=>{
                             this.expireCallbackTimer = null;
                             this.expireCallback && this.expireCallback(token.refresh_token);
