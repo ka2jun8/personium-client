@@ -58,11 +58,12 @@ export interface ExtCell extends PersoniumData {
  * //変わるかも
  */
 export interface Rule {
+    Name?: string,
     External?: boolean,
-    Service: string,
+    TargetUrl: string,
     Action: string,
-    Type: string,
-    Object: string,
+    EventType: string,
+    EventObject: string,
     "_Box.Name"?: string,
 }
 
@@ -71,7 +72,7 @@ export interface Ace {
         "D:href": string,
     },
     "D:grant": {
-        privilege: {[aceType: string]: {}}[],
+        "D:privilege": {[aceType: string]: {}}[],
     },
 }
 export interface Acl {
@@ -795,18 +796,18 @@ export class PersoniumClient {
     /**
      * ルールを削除する
      * @param cell 対象セル
-     * @param ruleId 削除するルールid
+     * @param ruleName 削除するルールName
      * @param box ボックスに紐づいてる場合はbox名指定
      * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
      */
-    deleteRule(cell: string, ruleId: string, box?: string, _token?: string) {
+    deleteRule(cell: string, ruleName: string, box?: string, _token?: string) {
         return new Promise<boolean>((resolve, reject) => {
             const token = _token || this.token;
             let url = this.createCellSchema(cell) + "__ctl/Rule";
             if(box){
-                url += "(__id='" + ruleId + "',_Box.Name='" + box + "')";
+                url += "(Name='" + ruleName + "',_Box.Name='" + box + "')";
             }else {
-                url += "(__id='" + ruleId + "')";
+                url += "(Name='" + ruleName + "')";
             }
             request
             .delete(url)
