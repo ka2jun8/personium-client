@@ -303,6 +303,14 @@ export declare class PersoniumClient {
      */
     deleteAccountLink(cell: string, account: string, name: string, box?: string, _token?: string): Promise<boolean>;
     /**
+     * アカウントを作成
+     * @param cell セル名
+     * @param account 対象として指定するアカウント名
+     * @param password アカウントのパスワード
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    createAccount(cell: string, account: string, password: string, _token?: string): Promise<boolean>;
+    /**
      * アカウントを削除
      * @param cell セル名
      * @param account 対象として指定するアカウント名
