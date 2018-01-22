@@ -718,6 +718,34 @@ export class PersoniumClient {
     }
 
     /**
+     * アカウントを作成
+     * @param cell セル名
+     * @param account 対象として指定するアカウント名
+     * @param password アカウントのパスワード
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    createAccount(cell: string, account: string, password: string, _token?: string) {
+        return new Promise<boolean>((resolve, reject) => {
+            const token = _token || this.token;
+            const url = this.createCellSchema(cell) + "__ctl/Account";
+            request
+                .post(url)
+                .set("Accept", "application/json")
+                .set("X-Personium-Credential", password)
+                .set("Authorization", "Bearer " + token)
+                .send({Name: account})
+                .end((error, res) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(true);
+                    }
+                });
+        });
+    }
+
+    /**
      * アカウントを削除
      * @param cell セル名
      * @param account 対象として指定するアカウント名
