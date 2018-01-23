@@ -36,6 +36,10 @@ export interface PersoniumData {
     __updated: string, //Date(xxx)
 }
 
+export interface Cell extends PersoniumData {
+    Name: string;
+}
+
 /**
  * 外部セルのデータ型
  */
@@ -1121,7 +1125,31 @@ export class PersoniumClient {
                 });
         });
     }
-    
+
+    /**
+     * セル一覧の取得
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    getCellList(_token?: string): Promise<Cell[]> {
+        return new Promise<Cell[]>((resolve, reject) => {
+            const token = _token || this.token;
+            let url = `${this.protocol}://${this.host}/__ctl/Cell`;
+            request
+                .get(url)
+                .set("Accept", "application/json")
+                .set("Authorization", "Bearer " + token)
+                .end((error, res) => {
+                    if (error) {
+                        resolve(error);
+                    }
+                    else {
+                        const response: PersoniumResponse = JSON.parse(res.text);
+                        resolve(response.d.results);
+                    }
+                });
+        });
+    }
+
     /**
      * プロファイル情報を取得
      * @param cell 
