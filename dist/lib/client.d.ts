@@ -27,6 +27,9 @@ export interface PersoniumData {
     __published: string;
     __updated: string;
 }
+export interface Cell extends PersoniumData {
+    Name: string;
+}
 /**
  * 外部セルのデータ型
  */
@@ -407,6 +410,11 @@ export declare class PersoniumClient {
      * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
      */
     deleteBox(cell: string, box: string, _token?: string): Promise<any>;
+    /**
+     * セル一覧の取得
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    getCellList(_token?: string): Promise<Cell[]>;
     /**
      * プロファイル情報を取得
      * @param cell
