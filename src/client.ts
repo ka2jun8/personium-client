@@ -824,7 +824,33 @@ export class PersoniumClient {
             });
         });
     }
-    
+
+    /**
+     * ルールを設定する
+     * @param cell 対象セル
+     * @param rule 登録するルール
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    updateRule(cell: string, rule: Rule, Name: string, _token?: string) {
+        return new Promise<boolean>((resolve, reject) => {
+            const token = _token || this.token;
+            const url = this.createCellSchema(cell) + "__ctl/Rule('"+Name+"')";
+            request
+            .put(url)
+            .set("Accept", "application/json")
+            .set("Authorization", "Bearer " + token)
+            .send(rule)
+            .end((error, res) => {
+                if (error) {
+                    reject(error);
+                }
+                else {
+                    resolve(true);
+                }
+            });
+        });
+    }
+        
     /**
      * ルールを削除する
      * @param cell 対象セル
