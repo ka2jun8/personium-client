@@ -27,6 +27,9 @@ export interface PersoniumData {
     __published: string;
     __updated: string;
 }
+export interface Cell extends PersoniumData {
+    Name: string;
+}
 /**
  * 外部セルのデータ型
  */
@@ -48,6 +51,7 @@ export interface ExtCell extends PersoniumData {
  * //変わるかも
  */
 export interface Rule {
+    __id?: string;
     External?: boolean;
     Service: string;
     Action: string;
@@ -60,7 +64,7 @@ export interface Ace {
         "D:href": string;
     };
     "D:grant": {
-        privilege: {
+        "D:privilege": {
             [aceType: string]: {};
         }[];
     };
@@ -113,6 +117,30 @@ export interface Role extends PersoniumData {
         };
     };
     _Relation: {
+        __deferred: {
+            uri: string;
+        };
+    };
+}
+export interface Box extends PersoniumData {
+    Name: string;
+    Schema: string;
+    _Relation: {
+        __deferred: {
+            uri: string;
+        };
+    };
+    _ReceivedMessage: {
+        __deferred: {
+            uri: string;
+        };
+    };
+    _SentMessage: {
+        __deferred: {
+            uri: string;
+        };
+    };
+    _Rule: {
         __deferred: {
             uri: string;
         };
@@ -220,6 +248,13 @@ export declare class PersoniumClient {
      */
     createRole(cell: string, role: string, box?: string, _token?: string): Promise<boolean>;
     /**
+     * BOX情報の取得
+     * @param cell 対象セル名
+     * @param box 特定のロール情報が取得したい場合は指定
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    getBox(cell: string, box?: string, _token?: string): Promise<Box | Box[]>;
+    /**
      * ロール情報の取得
      * @param cell 対象セル名
      * @param role 特定のロール情報が取得したい場合は指定
@@ -302,6 +337,14 @@ export declare class PersoniumClient {
      */
     deleteAccountLink(cell: string, account: string, name: string, box?: string, _token?: string): Promise<boolean>;
     /**
+     * アカウントを作成
+     * @param cell セル名
+     * @param account 対象として指定するアカウント名
+     * @param password アカウントのパスワード
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    createAccount(cell: string, account: string, password: string, _token?: string): Promise<boolean>;
+    /**
      * アカウントを削除
      * @param cell セル名
      * @param account 対象として指定するアカウント名
@@ -321,6 +364,15 @@ export declare class PersoniumClient {
      * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
      */
     setRule(cell: string, rule: Rule, _token?: string): Promise<boolean>;
+    /**
+     * ルールを設定する
+     * @param cell 対象セル
+     * @param rule 登録するルール
+     * @param ruleId ルールID
+     * @param box _Box.Name
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    updateRule(cell: string, rule: Rule, ruleId: string, box?: string, _token?: string): Promise<boolean>;
     /**
      * ルールを削除する
      * @param cell 対象セル
@@ -398,6 +450,11 @@ export declare class PersoniumClient {
      * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
      */
     deleteBox(cell: string, box: string, _token?: string): Promise<any>;
+    /**
+     * セル一覧の取得
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    getCellList(_token?: string): Promise<Cell[]>;
     /**
      * プロファイル情報を取得
      * @param cell
