@@ -886,10 +886,16 @@ export class PersoniumClient {
      * @param rule 登録するルール
      * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
      */
-    updateRule(cell: string, rule: Rule, Name: string, _token?: string) {
+    updateRule(cell: string, rule: Rule, Name: string, box?: string, _token?: string) {
         return new Promise<boolean>((resolve, reject) => {
             const token = _token || this.token;
-            const url = this.createCellSchema(cell) + "__ctl/Rule('"+Name+"')";
+            let url = this.createCellSchema(cell) + "__ctl/Rule";
+            if(box) {
+                url += "(Name='"+Name+"',_Box.Name='"+box+"')";
+            }else {
+                url += "(Name='"+Name+"')";
+            }
+
             request
             .put(url)
             .set("Accept", "application/json")
