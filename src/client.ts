@@ -36,6 +36,10 @@ export interface PersoniumData {
     __updated: string, //Date(xxx)
 }
 
+export interface Cell extends PersoniumData {
+    Name: string;
+}
+
 /**
  * 外部セルのデータ型
  */
@@ -58,6 +62,7 @@ export interface ExtCell extends PersoniumData {
  * //変わるかも
  */
 export interface Rule {
+    __id?: string,
     External?: boolean,
     Service: string,
     Action: string,
@@ -71,7 +76,7 @@ export interface Ace {
         "D:href": string,
     },
     "D:grant": {
-        privilege: {[aceType: string]: {}}[],
+        "D:privilege": {[aceType: string]: {}}[],
     },
 }
 export interface Acl {
@@ -127,6 +132,32 @@ export interface Role extends PersoniumData {
     _Relation: {
         __deferred: {
             uri: string,
+        }
+    }
+}
+
+
+export interface Box extends PersoniumData {
+    Name: string;
+    Schema: string;
+    _Relation: {
+        __deferred: {
+            uri: string;
+        }
+    };
+    _ReceivedMessage: {
+        __deferred: {
+            uri: string;
+        }
+    }
+    _SentMessage: {
+        __deferred: {
+            uri: string;
+        }
+    }
+    _Rule: {
+        __deferred: {
+            uri: string;
         }
     }
 }
@@ -404,6 +435,35 @@ export class PersoniumClient {
                         }
                     });
             }
+        });
+    }
+
+    /**
+     * BOX情報の取得
+     * @param cell 対象セル名
+     * @param box 特定のロール情報が取得したい場合は指定
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    getBox(cell: string, box?: string, _token?: string) {
+        return new Promise<Box[]|Box>((resolve, reject) => {
+            const token = _token || this.token;
+            let url = this.createCellSchema(cell) + "__ctl/Box";
+            if (box) {
+                url += "(Name='" + box + "')";
+            }
+            request
+                .get(url)
+                .set("Accept", "application/json")
+                .set("Authorization", "Bearer " + token)
+                .end((error, res) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        const response: PersoniumResponse = JSON.parse(res.text);
+                        resolve(response.d.results);
+                    }
+                });
         });
     }
 
@@ -717,6 +777,34 @@ export class PersoniumClient {
     }
 
     /**
+     * アカウントを作成
+     * @param cell セル名
+     * @param account 対象として指定するアカウント名
+     * @param password アカウントのパスワード
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    createAccount(cell: string, account: string, password: string, _token?: string) {
+        return new Promise<boolean>((resolve, reject) => {
+            const token = _token || this.token;
+            const url = this.createCellSchema(cell) + "__ctl/Account";
+            request
+                .post(url)
+                .set("Accept", "application/json")
+                .set("X-Personium-Credential", password)
+                .set("Authorization", "Bearer " + token)
+                .send({Name: account})
+                .end((error, res) => {
+                    if (error) {
+                        reject(error);
+                    }
+                    else {
+                        resolve(true);
+                    }
+                });
+        });
+    }
+
+    /**
      * アカウントを削除
      * @param cell セル名
      * @param account 対象として指定するアカウント名
@@ -791,7 +879,41 @@ export class PersoniumClient {
             });
         });
     }
-    
+
+    /**
+     * ルールを設定する
+     * @param cell 対象セル
+     * @param rule 登録するルール
+     * @param ruleId ルールID
+     * @param box _Box.Name
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    updateRule(cell: string, rule: Rule, ruleId: string, box?: string, _token?: string) {
+        return new Promise<boolean>((resolve, reject) => {
+            const token = _token || this.token;
+            let url = this.createCellSchema(cell) + "__ctl/Rule";
+            if(box) {
+                url += "(__id='"+ruleId+"',_Box.Name='"+box+"')";
+            }else {
+                url += "(__id='"+ruleId+"')";
+            }
+
+            request
+            .put(url)
+            .set("Accept", "application/json")
+            .set("Authorization", "Bearer " + token)
+            .send(rule)
+            .end((error, res) => {
+                if (error) {
+                    reject(error);
+                }
+                else {
+                    resolve(true);
+                }
+            });
+        });
+    }
+        
     /**
      * ルールを削除する
      * @param cell 対象セル
@@ -1092,7 +1214,31 @@ export class PersoniumClient {
                 });
         });
     }
-    
+
+    /**
+     * セル一覧の取得
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    getCellList(_token?: string): Promise<Cell[]> {
+        return new Promise<Cell[]>((resolve, reject) => {
+            const token = _token || this.token;
+            let url = `${this.protocol}://${this.host}/__ctl/Cell`;
+            request
+                .get(url)
+                .set("Accept", "application/json")
+                .set("Authorization", "Bearer " + token)
+                .end((error, res) => {
+                    if (error) {
+                        resolve(error);
+                    }
+                    else {
+                        const response: PersoniumResponse = JSON.parse(res.text);
+                        resolve(response.d.results);
+                    }
+                });
+        });
+    }
+
     /**
      * プロファイル情報を取得
      * @param cell 
