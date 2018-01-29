@@ -122,6 +122,30 @@ export interface Role extends PersoniumData {
         };
     };
 }
+export interface Box extends PersoniumData {
+    Name: string;
+    Schema: string;
+    _Relation: {
+        __deferred: {
+            uri: string;
+        };
+    };
+    _ReceivedMessage: {
+        __deferred: {
+            uri: string;
+        };
+    };
+    _SentMessage: {
+        __deferred: {
+            uri: string;
+        };
+    };
+    _Rule: {
+        __deferred: {
+            uri: string;
+        };
+    };
+}
 /**
  * 公開されているプロフィール情報のレスポンス型
  */
@@ -223,6 +247,13 @@ export declare class PersoniumClient {
      * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
      */
     createRole(cell: string, role: string, box?: string, _token?: string): Promise<boolean>;
+    /**
+     * BOX情報の取得
+     * @param cell 対象セル名
+     * @param box 特定のロール情報が取得したい場合は指定
+     * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
+     */
+    getBox(cell: string, box?: string, _token?: string): Promise<Box | Box[]>;
     /**
      * ロール情報の取得
      * @param cell 対象セル名
