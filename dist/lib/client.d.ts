@@ -368,6 +368,8 @@ export declare class PersoniumClient {
      * ルールを設定する
      * @param cell 対象セル
      * @param rule 登録するルール
+     * @param Name ルールID
+     * @param box _Box.Name
      * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
      */
     updateRule(cell: string, rule: Rule, Name: string, box?: string, _token?: string): Promise<boolean>;
