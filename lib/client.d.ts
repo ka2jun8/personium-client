@@ -370,7 +370,7 @@ export declare class PersoniumClient {
      * @param rule 登録するルール
      * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
      */
-    updateRule(cell: string, rule: Rule, Name: string, _token?: string): Promise<boolean>;
+    updateRule(cell: string, rule: Rule, Name: string, box?: string, _token?: string): Promise<boolean>;
     /**
      * ルールを削除する
      * @param cell 対象セル
