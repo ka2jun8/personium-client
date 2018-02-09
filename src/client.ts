@@ -1219,10 +1219,11 @@ export class PersoniumClient {
      * セル一覧の取得
      * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
      */
-    getCellList(_token?: string): Promise<Cell[]> {
+    getCellList(top: number = 25, _token?: string): Promise<Cell[]> {
         return new Promise<Cell[]>((resolve, reject) => {
             const token = _token || this.token;
-            let url = `${this.protocol}://${this.host}/__ctl/Cell`;
+            const _top = top;
+            let url = `${this.protocol}://${this.host}/__ctl/Cell?$top=${_top}`;
             request
                 .get(url)
                 .set("Accept", "application/json")
@@ -1238,7 +1239,6 @@ export class PersoniumClient {
                 });
         });
     }
-
     /**
      * プロファイル情報を取得
      * @param cell 
