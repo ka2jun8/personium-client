@@ -454,7 +454,7 @@ export declare class PersoniumClient {
      * セル一覧の取得
      * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
      */
-    getCellList(_token?: string): Promise<Cell[]>;
+    getCellList(top?: number, _token?: string): Promise<Cell[]>;
     /**
      * プロファイル情報を取得
      * @param cell
