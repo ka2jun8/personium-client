@@ -51,12 +51,12 @@ export interface ExtCell extends PersoniumData {
  * //変わるかも
  */
 export interface Rule {
-    __id?: string;
+    Name?: string;
     External?: boolean;
-    Service: string;
+    TargetUrl: string;
     Action: string;
-    Type: string;
-    Object: string;
+    EventType: string;
+    EventObject: string;
     "_Box.Name"?: string;
 }
 export interface Ace {
@@ -368,19 +368,19 @@ export declare class PersoniumClient {
      * ルールを設定する
      * @param cell 対象セル
      * @param rule 登録するルール
-     * @param ruleId ルールID
+     * @param Name ルールID
      * @param box _Box.Name
      * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
      */
-    updateRule(cell: string, rule: Rule, ruleId: string, box?: string, _token?: string): Promise<boolean>;
+    updateRule(cell: string, rule: Rule, Name: string, box?: string, _token?: string): Promise<boolean>;
     /**
      * ルールを削除する
      * @param cell 対象セル
-     * @param ruleId 削除するルールid
+     * @param ruleName 削除するルールName
      * @param box ボックスに紐づいてる場合はbox名指定
      * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
      */
-    deleteRule(cell: string, ruleId: string, box?: string, _token?: string): Promise<boolean>;
+    deleteRule(cell: string, ruleName: string, box?: string, _token?: string): Promise<boolean>;
     /**
      * メッセージの送信API
      * @param cell セル名
@@ -454,7 +454,7 @@ export declare class PersoniumClient {
      * セル一覧の取得
      * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
      */
-    getCellList(_token?: string): Promise<Cell[]>;
+    getCellList(top?: number, _token?: string): Promise<Cell[]>;
     /**
      * プロファイル情報を取得
      * @param cell

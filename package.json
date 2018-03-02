@@ -1,6 +1,6 @@
 {
   "name": "personium-client",
-  "version": "0.0.7",
+  "version": "0.1.0",
   "main": "index.js",
   "browser": "index.webpack.js",
   "types": "./lib/client.d.ts",

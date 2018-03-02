@@ -62,12 +62,12 @@ export interface ExtCell extends PersoniumData {
  * //変わるかも
  */
 export interface Rule {
-    __id?: string,
+    Name?: string,
     External?: boolean,
-    Service: string,
+    TargetUrl: string,
     Action: string,
-    Type: string,
-    Object: string,
+    EventType: string,
+    EventObject: string,
     "_Box.Name"?: string,
 }
 
@@ -884,18 +884,18 @@ export class PersoniumClient {
      * ルールを設定する
      * @param cell 対象セル
      * @param rule 登録するルール
-     * @param ruleId ルールID
+     * @param Name ルールID
      * @param box _Box.Name
      * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
      */
-    updateRule(cell: string, rule: Rule, ruleId: string, box?: string, _token?: string) {
+    updateRule(cell: string, rule: Rule, Name: string, box?: string, _token?: string) {
         return new Promise<boolean>((resolve, reject) => {
             const token = _token || this.token;
             let url = this.createCellSchema(cell) + "__ctl/Rule";
             if(box) {
-                url += "(__id='"+ruleId+"',_Box.Name='"+box+"')";
+                url += "(Name='"+Name+"',_Box.Name='"+box+"')";
             }else {
-                url += "(__id='"+ruleId+"')";
+                url += "(Name='"+Name+"')";
             }
 
             request
@@ -917,18 +917,18 @@ export class PersoniumClient {
     /**
      * ルールを削除する
      * @param cell 対象セル
-     * @param ruleId 削除するルールid
+     * @param ruleName 削除するルールName
      * @param box ボックスに紐づいてる場合はbox名指定
      * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
      */
-    deleteRule(cell: string, ruleId: string, box?: string, _token?: string) {
+    deleteRule(cell: string, ruleName: string, box?: string, _token?: string) {
         return new Promise<boolean>((resolve, reject) => {
             const token = _token || this.token;
             let url = this.createCellSchema(cell) + "__ctl/Rule";
             if(box){
-                url += "(__id='" + ruleId + "',_Box.Name='" + box + "')";
+                url += "(Name='" + ruleName + "',_Box.Name='" + box + "')";
             }else {
-                url += "(__id='" + ruleId + "')";
+                url += "(Name='" + ruleName + "')";
             }
             request
             .delete(url)
@@ -1219,10 +1219,11 @@ export class PersoniumClient {
      * セル一覧の取得
      * @param _token 最後にloginしたトークン以外を利用する場合はトークンを指定
      */
-    getCellList(_token?: string): Promise<Cell[]> {
+    getCellList(top: number = 25, _token?: string): Promise<Cell[]> {
         return new Promise<Cell[]>((resolve, reject) => {
             const token = _token || this.token;
-            let url = `${this.protocol}://${this.host}/__ctl/Cell`;
+            const _top = top;
+            let url = `${this.protocol}://${this.host}/__ctl/Cell?$top=${_top}`;
             request
                 .get(url)
                 .set("Accept", "application/json")
@@ -1238,7 +1239,6 @@ export class PersoniumClient {
                 });
         });
     }
-
     /**
      * プロファイル情報を取得
      * @param cell 
